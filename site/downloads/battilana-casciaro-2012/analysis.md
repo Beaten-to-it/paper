@@ -8,7 +8,7 @@
 - DOI: https://doi.org/10.5465/amj.2009.0891
 - 논문 유형: 12개월 종단 설문과 8개 심층 사례를 결합한 다방법 실증연구
 - 연구대상: 영국 NHS에서 임상관리자가 주도한 변화 프로젝트 68개
-- 보관 원문: `output/pdf/Battilana-Casciaro-2012-Change-agents-networks-institutions.pdf`
+- 보관 원문: 저자 로컬 보관(공개 사이트에는 미게시)
 - 확인일: 2026-08-11
 
 Crossref에서 DOI, 제목, 학술지 논문 유형과 출판 정보를 다시 확인했고 `updated-by` 관계는 발견되지 않았다. 공개 원문은 Harvard DASH의 저자 원고이며, 원문 PDF 자체는 공개 사이트 산출물에서 제외한다.

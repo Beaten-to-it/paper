@@ -12,7 +12,7 @@
 - 논문 유형: 오픈액세스 학술대회 논문, 탐색적 질적 다중 사례연구
 - 라이선스: CC BY 4.0
 - 출판사 페이지: https://link.springer.com/chapter/10.1007/978-3-032-22375-3_18
-- 보관 원문: `output/pdf/Neumann-et-al-2026-Between-policy-and-practice.pdf`
+- 보관 원문: 저자 로컬 보관(공개 사이트에는 미게시)
 - 확인일: 2026-08-10
 
 ### 파일 검증

@@ -44,6 +44,11 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn('artifact.type === "infographic"', app_script)
         self.assertIn('class="artifact__preview"', app_script)
 
+    def test_public_notebooklm_logs_do_not_expose_private_workspace_urls(self):
+        for run_log in SITE_ROOT.glob("downloads/*/notebooklm-run.md"):
+            public_text = run_log.read_text(encoding="utf-8")
+            self.assertNotIn("notebook.google.com/notebook/", public_text, run_log)
+
 
 if __name__ == "__main__":
     unittest.main()

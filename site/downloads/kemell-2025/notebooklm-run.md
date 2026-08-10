@@ -3,7 +3,7 @@
 - 실행일: 2026-08-10
 - 서비스: Gemini Notebook (구 NotebookLM)
 - 노트북 제목: `Kemell 2025 - SW 조직의 GenAI 도입`
-- 노트북 URL: https://notebook.google.com/notebook/22f732fe-c28b-4679-9a5a-dafdb9766f99
+- 노트북 위치: 비공개 연구 작업공간(공개본에서는 식별자 생략)
 - 소스 수: 1개
 - 단일 소스: https://cris.tuni.fi/ws/portalfiles/portal/153396590/1-s2.0-S0950584925001442-main.pdf
 - 소스 상태: 처리 완료, 원문 기반 한국어 요약 표시 확인
@@ -13,15 +13,15 @@
 - 오디오 상태: 생성 완료 및 로컬 보관 완료
 - 오디오 제목: `소프트웨어 조직의 생성형 AI 도입 민낯`
 - 표시 길이: 19분 54초
-- 로컬 파일: `output/audio/Kemell-2025-Korean-deep-dive.m4a`
+- 공개 파일명: `Kemell-2025-Korean-deep-dive.m4a`
 - 로컬 검증: AAC, 44.1 kHz, stereo, 1,195.015초, 38,461,029 bytes
 - SHA-256: `FFE042FF800D20E8E7314DFC4F4A0D1B23DEA8F05CD736198FCCD9B88542F8F6`
 
 ## 후속 시각 산출물
 
-- 편집 가능한 세미나 PowerPoint: `output/slides/Kemell-2025-seminar-deck.pptx`
-- 세미나 PDF: `output/pdf/Kemell-2025-seminar-deck.pdf`
-- 한 페이지 인포그래픽: `output/infographics/Kemell-2025-organizational-adoption-infographic.png`
+- 편집 가능한 세미나 PowerPoint: `Kemell-2025-seminar-deck.pptx`
+- 세미나 PDF: `Kemell-2025-seminar-deck.pdf`
+- 한 페이지 인포그래픽: `Kemell-2025-organizational-adoption-infographic.png`
 - 작성일: 2026-08-11
 - 구성 원칙: 논문이 직접 보고한 결과와 박사논문용 후속 연구 해석을 색상·라벨로 분리
 - PPT 검증: 11개 슬라이드 개별 렌더링 및 발표자 노트의 `[Sources]` 블록 확인

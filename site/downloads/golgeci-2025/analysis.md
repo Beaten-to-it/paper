@@ -8,7 +8,7 @@
 - DOI: https://doi.org/10.1016/j.hrmr.2024.101075
 - 논문 유형: 통합적 문헌고찰(integrative review)과 개념적 과정 프레임워크
 - 라이선스: CC BY 4.0
-- 보관 원문: `output/pdf/Golgeci-et-al-2025-AI-resistance-process-framework.pdf`
+- 보관 원문: 저자 로컬 보관(공개 사이트에는 미게시)
 - 확인일: 2026-08-11
 
 Crossref에서 DOI, 제목, 학술지 논문 유형과 출판 정보를 다시 확인했고 `updated-by` 관계는 발견되지 않았다. 다만 이는 철회가 절대로 없다는 보장이 아니므로 최종 투고 직전 다시 확인한다.

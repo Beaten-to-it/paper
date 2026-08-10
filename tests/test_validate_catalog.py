@@ -43,14 +43,16 @@ class CatalogValidationTests(unittest.TestCase):
     def run_validator(self, catalog: dict, files: dict[str, bytes] | None = None):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            public_root = root / "site"
+            public_root.mkdir()
             catalog_path = root / "catalog.json"
             catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
             for relative_path, content in (files or {}).items():
-                path = root / relative_path
+                path = public_root / relative_path
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(content)
             return subprocess.run(
-                [sys.executable, str(VALIDATOR), str(catalog_path), str(root)],
+                [sys.executable, str(VALIDATOR), str(catalog_path), str(public_root)],
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
@@ -137,6 +139,77 @@ class CatalogValidationTests(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unsafe release url", result.stderr)
+
+    def test_rejects_unknown_storage(self):
+        catalog = self.valid_catalog()
+        catalog["papers"][0]["artifacts"][0].update(
+            {
+                "storage": "external",
+                "href": "javascript:alert(document.domain)",
+            }
+        )
+
+        result = self.run_validator(catalog)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsupported storage", result.stderr)
+
+    def test_rejects_complete_artifact_with_none_storage(self):
+        catalog = self.valid_catalog()
+        catalog["papers"][0]["artifacts"][0].update(
+            {
+                "storage": "none",
+                "href": "javascript:alert(document.domain)",
+            }
+        )
+
+        result = self.run_validator(catalog)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("complete artifacts require public storage", result.stderr)
+
+    def test_rejects_release_path_traversal(self):
+        catalog = self.valid_catalog()
+        catalog["papers"][0]["artifacts"][0].update(
+            {
+                "storage": "release",
+                "href": "https://github.com/Beaten-to-it/paper/releases/download/../../../attacker/repo/releases/download/v1/setup.exe",
+            }
+        )
+
+        result = self.run_validator(catalog)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsafe release url", result.stderr)
+
+    def test_rejects_undeclared_public_file(self):
+        catalog = self.valid_catalog()
+
+        result = self.run_validator(
+            catalog,
+            {
+                "downloads/example-analysis.md": "분석 카드".encode("utf-8"),
+                "downloads/qa-notes.zip": b"private",
+            },
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("undeclared public file", result.stderr)
+
+    def test_rejects_pdf_disguised_as_analysis(self):
+        catalog = self.valid_catalog()
+        catalog["papers"][0]["artifacts"][0].update(
+            {
+                "href": "downloads/source-paper.pdf",
+                "size_bytes": 4,
+                "sha256": "13fe9d84310e77f13a6bcb86c45b9f39517f5a98e1e6a18cea2b1b756bf59198",
+            }
+        )
+
+        result = self.run_validator(catalog, {"downloads/source-paper.pdf": b"PDF!"})
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid pages artifact type or extension", result.stderr)
 
 
 if __name__ == "__main__":

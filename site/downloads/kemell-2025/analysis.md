@@ -9,7 +9,7 @@
 - 논문 유형: 동료심사 학술지 논문, 다중 사례연구
 - 라이선스: CC BY 4.0
 - 공식 연구포털: https://researchportal.tuni.fi/en/publications/still-just-personal-assistants-a-multiple-case-study-of-generativ/
-- 보관 원문: `output/pdf/Kemell-et-al-2025-Still-just-personal-assistants.pdf`
+- 보관 원문: 저자 로컬 보관(공개 사이트에는 미게시)
 - 공개 원문 출처: https://cris.tuni.fi/ws/portalfiles/portal/153396590/1-s2.0-S0950584925001442-main.pdf
 - 확인일: 2026-08-10
 
@@ -158,4 +158,3 @@
 5. Battilana & Casciaro (2012): 변화주도자의 네트워크 위치와 변화 성공 조건
 6. Heyden et al. (2017): 상위·중간관리자의 상향식·하향식 역할 구성
 7. Oreg et al. (2011): 변화 수용자 반응의 선행요인과 결과
-

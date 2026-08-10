@@ -3,10 +3,10 @@
 - 실행일: 2026-08-10
 - 서비스: Gemini Notebook (구 NotebookLM)
 - 노트북 제목: `Neumann 2026 - GenAI 정책과 애자일 실무의 간극`
-- 노트북 URL: https://notebook.google.com/notebook/7dc6a05b-f5bf-4715-bd07-aa5fb1115425
+- 노트북 위치: 비공개 연구 작업공간(공개본에서는 식별자 생략)
 - 소스 수: 1개
 - 업로드 방식: Chrome 확장 프로그램을 통한 로컬 파일 직접 업로드
-- 단일 소스 파일: `output/pdf/Neumann-et-al-2026-Between-policy-and-practice.pdf`
+- 단일 소스 파일: 저자 보관 원문 1개(공개 사이트에는 미게시)
 - 소스 상태: 처리 완료
 - 확인 결과: 로컬 PDF 파일명, 소스 1개, 논문 기반 한국어 요약·추천 질문 표시 확인
 - 후속 생성 상태: 한국어 심층 분석 오디오, 13장 슬라이드, 세로형 상세 인포그래픽 완료
@@ -18,7 +18,7 @@
 - 소스: 1개
 - NotebookLM 제목: `애자일 개발팀이 몰래 AI를 쓰는 이유`
 - 화면 표시 길이: `22:08`
-- 로컬 파일: `output/audio/Neumann-2026-Korean-deep-dive.m4a`
+- 공개 파일명: `Neumann-2026-Korean-deep-dive.m4a`
 - 파일 크기: 42,745,397 bytes
 - 실제 재생시간: 1,328.134966초 (약 22분 08초)
 - 오디오 규격: AAC, 44.1 kHz, 2채널
@@ -36,8 +36,8 @@
 - 소스: 1개
 - NotebookLM 제목: `Agile GenAI Policy and Practice`
 - 슬라이드 수: 13장
-- PowerPoint: `output/slides/Neumann-2026-NotebookLM-seminar-deck.pptx`
-- PDF: `output/pdf/Neumann-2026-NotebookLM-seminar-deck.pdf`
+- PowerPoint: `Neumann-2026-NotebookLM-seminar-deck.pptx`
+- PDF: `Neumann-2026-NotebookLM-seminar-deck.pdf`
 - PPTX 크기: 13,678,611 bytes
 - PPTX SHA-256: `6A3978E96874758F93C3E10D5B9B604EDA07E11F4F4EB7B34BDD0EB7A992AC9C`
 - PDF 크기: 12,778,964 bytes
@@ -59,8 +59,8 @@
 - 스타일: NotebookLM 자동 선택
 - 소스: 1개
 - NotebookLM 제목: `생성형 AI 정책과 실무 간극`
-- 최종 교정본: `output/infographics/Neumann-2026-policy-practice-gap-infographic.png`
-- 원본 보존본: `output/infographics/Neumann-2026-NotebookLM-infographic-original.png`
+- 최종 교정본: `Neumann-2026-policy-practice-gap-infographic.png`
+- 원본 보존본: 비공개 연구 보관본
 - 최종 교정본 크기: 937 × 1,679px, 1,951,433 bytes
 - 최종 교정본 SHA-256: `A6717DD56EDC2E426592F144E35E10D5ED035DBE19A56CD2B51F5067FBF91F1E`
 - 원본 크기: 1,536 × 2,752px, 4,744,761 bytes

@@ -8,7 +8,7 @@
 - DOI: https://doi.org/10.1287/mnsc.1120.1583
 - 논문 유형: 68개 변화 프로젝트의 12개월 종단·다방법 실증연구
 - 연구대상: 영국 NHS 임상관리자가 주도한 계획적 조직변화
-- 보관 원문: `output/pdf/Battilana-Casciaro-2013-Strong-ties-affective-cooptation.pdf`
+- 보관 원문: 저자 로컬 보관(공개 사이트에는 미게시)
 - 확인일: 2026-08-11
 
 Crossref와 INFORMS 공식 페이지에서 DOI, 제목, 저자, 출판정보를 확인했고 Crossref `updated-by` 관계는 발견되지 않았다. 원문은 저작권이 있는 제3자 PDF이므로 공개 사이트에서 배포하지 않는다.
