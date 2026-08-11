@@ -397,6 +397,24 @@ class CatalogValidationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("page content does not match declared type", result.stderr)
 
+    def test_rejects_png_with_invalid_scanline_filter(self):
+        payload = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNlAAAADAAGjm0zfwAAAABJRU5ErkJggg=="
+        )
+        catalog = self.rights_aware_catalog()
+        artifact = next(a for a in catalog["papers"][0]["artifacts"] if a["type"] == "infographic")
+        artifact.update({
+            "size_bytes": 67,
+            "sha256": "3e69154c3434f157994e32e29f6de0144e38f0598fa3b20b6aecf23c25784ac5",
+        })
+        files = self.rights_aware_files()
+        files["downloads/graphic.png"] = payload
+
+        result = self.run_validator(catalog, files)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("page content does not match declared type", result.stderr)
+
     def test_rejects_invalid_riff_payload_as_webp_infographic(self):
         payload = b"RIFFnot-WEBP"
         catalog = self.rights_aware_catalog()

@@ -388,7 +388,9 @@ def is_valid_png(payload: bytes) -> bool:
         decoded += decompressor.flush()
     except zlib.error:
         return False
-    return len(decoded) == expected_size and decompressor.eof and not decompressor.unused_data
+    if len(decoded) != expected_size or not decompressor.eof or decompressor.unused_data:
+        return False
+    return all(decoded[row_start] <= 4 for row_start in range(0, expected_size, row_bytes + 1))
 
 
 def looks_like_pdf(payload: bytes) -> bool:
