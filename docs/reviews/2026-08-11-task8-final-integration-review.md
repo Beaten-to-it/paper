@@ -30,4 +30,8 @@
 
 - Corrected commit before this ledger: `6eb297a5700b1ba479ee1606e3ea79d1e11c1b67`
 - Corrected tree before this ledger: `d81c4463500e0299844876e233b0599a0071bbfd`
-- Latest-tree closure review: pending on the commit containing this ledger.
+- Reviewed commit: `61c52f6255a5b1dd742c141ddbef21f514931edd`
+- Reviewed tree: `c47d5d18dd8d0c2e755b107ab4e650921ad921b4`
+- Result: H1 CLOSED; `Critical = 0`, `High = 0`, `Medium = 0`, `Low = 1`; gate PASS.
+- Independent evidence: Python 51/51, Node 9/9, live Release-backed validator 6 groups/49 artifacts, exact four protected companions, clean pre/post tracked state, and all five H1 probes rejected.
+- Residual Low disposition: the Pages workflow explicitly invokes only `tests/protected_crypto.test.mjs`, while the three protected-viewer tests are currently covered by local/manual full Node verification. No present integrity bypass was reproduced. Record as CI hardening backlog; do not open another product-change round for a nonblocking Low.
