@@ -62,6 +62,7 @@
       "summary": "변화 괴리도에 따라 구조적 공백과 응집형 네트워크의 효과가 달라지는 변화주도자 네트워크 베이스 논문.",
       "artifacts": [
         {"id":"bc2012-analysis","type":"analysis","title":"네트워크 조건부 이론 분석 카드","href":"downloads/battilana-casciaro-2012/analysis.md","storage":"pages","size_bytes":7493,"sha256":"d0ffe13dce0e294068f954da00880ebcfdb54e683d6bce3c1175314be73fb44c","status":"complete","provenance":"researcher_generated"},
+        {"id":"bc2012-study-guide","type":"analysis","title":"전문 번역이 아닌 한국어 학습가이드","href":"downloads/battilana-casciaro-2012/korean-study-guide.md","storage":"pages","size_bytes":10530,"sha256":"35c6b2562d9de461cf29155c764df29982554c3a5acc2c5034e6b8cca339d8e3","status":"complete","provenance":"researcher_generated"},
         {"id":"bc2012-prompt","type":"notebooklm_prompt","title":"음성·PPT·네트워크 시각화용 프롬프트","href":"downloads/battilana-casciaro-2012/notebooklm-prompts.md","storage":"pages","size_bytes":2985,"sha256":"74dca9e96d7fe72a54cc0127c10584135b861ec215ca660cb5730243fd00d2fa","status":"complete","provenance":"researcher_generated"},
         {"id":"bc2012-run","type":"notebooklm_run","title":"NotebookLM 단일 원문 실행 기록","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
         {"id":"bc2012-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
@@ -79,6 +80,7 @@
       "summary": "지지자·경계인·저항자를 구분하고 강한 관계와 변화 괴리도의 조건부 효과를 보여 주는 관계 전략 베이스 논문.",
       "artifacts": [
         {"id":"bc2013-analysis","type":"analysis","title":"저항 대상별 관계 전략 분석 카드","href":"downloads/battilana-casciaro-2013/analysis.md","storage":"pages","size_bytes":7543,"sha256":"23a5195de07892be3ea78dbbb81ee17be16c2a57e42070d7284fecb0afcf7b15","status":"complete","provenance":"researcher_generated"},
+        {"id":"bc2013-study-guide","type":"analysis","title":"전문 번역이 아닌 한국어 학습가이드","href":"downloads/battilana-casciaro-2013/korean-study-guide.md","storage":"pages","size_bytes":11674,"sha256":"7e7ea441d56860631a6fec956776e5b793860a95d588e5c3adcf4e6a49e155bd","status":"complete","provenance":"researcher_generated"},
         {"id":"bc2013-prompt","type":"notebooklm_prompt","title":"음성·PPT·전략 매트릭스용 프롬프트","href":"downloads/battilana-casciaro-2013/notebooklm-prompts.md","storage":"pages","size_bytes":3010,"sha256":"91dd6492a34cacb93a1b47b259b55ba2df22520794b71882dbba81181a6e2456","status":"complete","provenance":"researcher_generated"},
         {"id":"bc2013-run","type":"notebooklm_run","title":"NotebookLM 단일 원문 실행 기록","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
         {"id":"bc2013-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
