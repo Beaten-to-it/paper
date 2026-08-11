@@ -7,6 +7,18 @@ SITE_ROOT = REPO_ROOT / "site"
 
 
 class SiteContractTests(unittest.TestCase):
+    def test_public_text_files_use_lf_for_stable_catalog_hashes(self):
+        text_extensions = {".css", ".html", ".js", ".json", ".md", ".svg"}
+        offending = [
+            path.relative_to(REPO_ROOT).as_posix()
+            for path in SITE_ROOT.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() in text_extensions
+            and b"\r\n" in path.read_bytes()
+        ]
+
+        self.assertEqual(offending, [], f"public text files must use LF: {offending}")
+
     def test_homepage_loads_catalog_and_exposes_filters(self):
         homepage = SITE_ROOT / "index.html"
         app_script = SITE_ROOT / "assets" / "app.js"
