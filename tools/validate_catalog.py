@@ -92,6 +92,79 @@ PUBLIC_SITE_FILES = {
     "protected-viewer.html",
     "viewer.html",
 }
+RELEASE_V1 = "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/"
+RELEASE_V2 = "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/"
+EXPECTED_GROUP_IDENTITIES = {
+    "kemell-2025": ("paper", 2025, "Still just personal assistants?", "Kemell, Saarikallio, Nguyen-Duc, & Abrahamsson (2025) · Information and Software Technology 186, 107805"),
+    "neumann-2026": ("paper", 2026, "Between Policy and Practice", "Neumann et al. (2026) · Between Policy and Practice: GenAI Adoption in Agile Software Development Teams"),
+    "golgeci-2025": ("paper", 2025, "Confronting and alleviating AI resistance in the workplace", "Golgeci, Ritala, Arslan, McKenna, & Ali (2025) · Human Resource Management Review 35, 101075"),
+    "battilana-casciaro-2012": ("paper", 2012, "Change Agents, Networks, and Institutions", "Battilana & Casciaro (2012) · Academy of Management Journal 55(2)"),
+    "battilana-casciaro-2013": ("paper", 2013, "Overcoming Resistance to Organizational Change", "Battilana & Casciaro (2013) · Management Science 59(4), 819-836"),
+    "research-design": ("research-design", 2026, "연구 종합과 설계", "Doctoral research design · updated 2026-08-11"),
+}
+EXPECTED_ARTIFACT_BINDINGS = {
+    "kemell-2025": {
+        "kemell-2025-source": ("source_paper", "release", RELEASE_V2 + "Kemell-et-al-2025-Still-just-personal-assistants.pdf"),
+        "kemell-2025-korean": ("korean_version", "release", RELEASE_V2 + "Kemell-2025-Korean-unofficial-translation.pdf"),
+        "kemell-analysis": ("analysis", "pages", "downloads/kemell-2025/analysis.md"),
+        "kemell-prompt": ("notebooklm_prompt", "pages", "downloads/kemell-2025/notebooklm-prompts.md"),
+        "kemell-run": ("notebooklm_run", "pages", "downloads/kemell-2025/notebooklm-run.md"),
+        "kemell-audio": ("audio", "release", RELEASE_V1 + "Kemell-2025-Korean-deep-dive.m4a"),
+        "kemell-slides": ("slides", "release", RELEASE_V1 + "Kemell-2025-seminar-deck.pptx"),
+        "kemell-slide-pdf": ("slide_pdf", "release", RELEASE_V1 + "Kemell-2025-seminar-deck.pdf"),
+        "kemell-infographic": ("infographic", "pages", "downloads/kemell-2025/infographic.png"),
+    },
+    "neumann-2026": {
+        "neumann-2026-source": ("source_paper", "release", RELEASE_V2 + "Neumann-et-al-2026-Between-policy-and-practice.pdf"),
+        "neumann-2026-korean": ("korean_version", "release", RELEASE_V2 + "Neumann-2026-Korean-unofficial-translation.pdf"),
+        "neumann-analysis": ("analysis", "pages", "downloads/neumann-2026/analysis.md"),
+        "neumann-prompt": ("notebooklm_prompt", "pages", "downloads/neumann-2026/notebooklm-prompts.md"),
+        "neumann-run": ("notebooklm_run", "pages", "downloads/neumann-2026/notebooklm-run.md"),
+        "neumann-audio": ("audio", "release", RELEASE_V1 + "Neumann-2026-Korean-deep-dive.m4a"),
+        "neumann-slides": ("slides", "release", RELEASE_V1 + "Neumann-2026-NotebookLM-seminar-deck.pptx"),
+        "neumann-slide-pdf": ("slide_pdf", "release", RELEASE_V1 + "Neumann-2026-NotebookLM-seminar-deck.pdf"),
+        "neumann-infographic": ("infographic", "pages", "downloads/neumann-2026/infographic.png"),
+    },
+    "golgeci-2025": {
+        "golgeci-2025-source": ("source_paper", "release", RELEASE_V2 + "Golgeci-et-al-2025-AI-resistance-process-framework.pdf"),
+        "golgeci-2025-korean": ("korean_version", "release", RELEASE_V2 + "Golgeci-2025-Korean-unofficial-translation.pdf"),
+        "golgeci-analysis": ("analysis", "pages", "downloads/golgeci-2025/analysis.md"),
+        "golgeci-prompt": ("notebooklm_prompt", "pages", "downloads/golgeci-2025/notebooklm-prompts.md"),
+        "golgeci-run": ("notebooklm_run", "pages", "downloads/golgeci-2025/notebooklm-run.md"),
+        "golgeci-audio": ("audio", "release", RELEASE_V2 + "Golgeci-2025-NotebookLM-audio-overview.m4a"),
+        "golgeci-slides": ("slides", "release", RELEASE_V2 + "Golgeci-2025-NotebookLM-seminar-deck.pptx"),
+        "golgeci-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Golgeci-2025-NotebookLM-seminar-deck.pdf"),
+        "golgeci-infographic": ("infographic", "pages", "downloads/golgeci-2025/infographic.png"),
+    },
+    "battilana-casciaro-2012": {
+        "bc2012-source": ("source_paper", "external", "https://doi.org/10.5465/amj.2009.0891"),
+        "bc2012-korean": ("korean_version", "pages", "downloads/battilana-casciaro-2012/korean-study-guide.md"),
+        "bc2012-analysis": ("analysis", "pages", "downloads/battilana-casciaro-2012/analysis.md"),
+        "bc2012-prompt": ("notebooklm_prompt", "pages", "downloads/battilana-casciaro-2012/notebooklm-prompts.md"),
+        "bc2012-run": ("notebooklm_run", "pages", "downloads/battilana-casciaro-2012/notebooklm-run.md"),
+        "bc2012-audio": ("audio", "release", RELEASE_V2 + "Battilana-Casciaro-2012-NotebookLM-audio-overview.m4a"),
+        "bc2012-slides": ("slides", "release", RELEASE_V2 + "Battilana-Casciaro-2012-NotebookLM-seminar-deck.pptx"),
+        "bc2012-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Battilana-Casciaro-2012-NotebookLM-seminar-deck.pdf"),
+        "bc2012-infographic": ("infographic", "pages", "downloads/battilana-casciaro-2012/infographic.png"),
+    },
+    "battilana-casciaro-2013": {
+        "bc2013-source": ("source_paper", "external", "https://doi.org/10.1287/mnsc.1120.1583"),
+        "bc2013-korean": ("korean_version", "pages", "downloads/battilana-casciaro-2013/korean-study-guide.md"),
+        "bc2013-analysis": ("analysis", "pages", "downloads/battilana-casciaro-2013/analysis.md"),
+        "bc2013-prompt": ("notebooklm_prompt", "pages", "downloads/battilana-casciaro-2013/notebooklm-prompts.md"),
+        "bc2013-run": ("notebooklm_run", "pages", "downloads/battilana-casciaro-2013/notebooklm-run.md"),
+        "bc2013-audio": ("audio", "release", RELEASE_V2 + "Battilana-Casciaro-2013-NotebookLM-audio-overview.m4a"),
+        "bc2013-slides": ("slides", "release", RELEASE_V2 + "Battilana-Casciaro-2013-NotebookLM-seminar-deck.pptx"),
+        "bc2013-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Battilana-Casciaro-2013-NotebookLM-seminar-deck.pdf"),
+        "bc2013-infographic": ("infographic", "pages", "downloads/battilana-casciaro-2013/infographic.png"),
+    },
+    "research-design": {
+        "four-paper-bridge": ("research_synthesis", "pages", "downloads/research-design/four-paper-theory-bridge.md"),
+        "literature-map": ("research_design", "pages", "downloads/research-design/literature-map.md"),
+        "core-matrix": ("research_design", "pages", "downloads/research-design/core-paper-matrix-research-model-interview-guide.md"),
+        "literature-map-xlsx": ("spreadsheet", "release", RELEASE_V1 + "AI-transformation-change-agent-literature-map-2026-08-10.xlsx"),
+    },
+}
 
 
 def validate_metadata(artifact: dict, schema_version: int) -> None:
@@ -348,6 +421,44 @@ def validate_paper_contract(paper: dict) -> None:
             raise CatalogError("protected companion does not match paper slot")
 
 
+def validate_catalog_identity(catalog: dict) -> None:
+    papers = catalog["papers"]
+    slugs = [paper.get("slug") for paper in papers]
+    if len(slugs) != len(EXPECTED_GROUP_IDENTITIES) or set(slugs) != set(EXPECTED_GROUP_IDENTITIES):
+        raise CatalogError("canonical catalog identity mismatch: expected six unique groups")
+
+    global_artifact_ids: set[str] = set()
+    for paper in papers:
+        slug = paper["slug"]
+        expected_identity = EXPECTED_GROUP_IDENTITIES[slug]
+        actual_identity = (paper.get("kind"), paper.get("year"), paper.get("title"), paper.get("citation"))
+        if actual_identity != expected_identity:
+            raise CatalogError(f"canonical catalog identity mismatch: {slug}")
+
+        artifacts = paper.get("artifacts")
+        if not isinstance(artifacts, list):
+            raise CatalogError(f"canonical catalog identity mismatch: {slug} artifacts")
+        artifact_ids = [artifact.get("id") for artifact in artifacts]
+        expected_bindings = EXPECTED_ARTIFACT_BINDINGS[slug]
+        if (
+            len(artifact_ids) != len(expected_bindings)
+            or set(artifact_ids) != set(expected_bindings)
+            or len(set(artifact_ids)) != len(artifact_ids)
+        ):
+            raise CatalogError(f"canonical catalog identity mismatch: {slug} artifact ids")
+        for artifact in artifacts:
+            artifact_id = artifact["id"]
+            if artifact_id in global_artifact_ids:
+                raise CatalogError(f"canonical catalog identity mismatch: duplicate artifact id {artifact_id}")
+            global_artifact_ids.add(artifact_id)
+            actual_binding = (artifact.get("type"), artifact.get("storage"), artifact.get("href"))
+            if actual_binding != expected_bindings[artifact_id] or artifact.get("status") != "complete":
+                raise CatalogError(f"canonical catalog identity mismatch: {artifact_id}")
+
+    if len(global_artifact_ids) != 49:
+        raise CatalogError("canonical catalog identity mismatch: expected 49 unique artifacts")
+
+
 def is_valid_png(payload: bytes) -> bool:
     if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
         return False
@@ -429,17 +540,26 @@ def validate_public_inventory(public_root: Path, declared_pages: set[str]) -> No
                 raise CatalogError(f"undeclared public file: {relative_path}")
 
 
-def validate(catalog: dict, public_root: Path, release_assets: dict[str, dict] | None = None) -> tuple[int, int]:
+def validate(
+    catalog: dict,
+    public_root: Path,
+    release_assets: dict[str, dict] | None = None,
+    enforce_identity: bool = True,
+) -> tuple[int, int]:
     papers = catalog["papers"]
     schema_version = catalog.get("version", 1)
     if isinstance(schema_version, bool) or not isinstance(schema_version, int) or schema_version < 1:
         raise CatalogError("invalid catalog version")
+    if enforce_identity and schema_version != 2:
+        raise CatalogError("canonical catalog identity mismatch: expected version 2")
     if schema_version >= 2 and release_assets is None and any(
         artifact.get("status") == "complete" and artifact.get("storage") == "release"
         for paper in papers
         for artifact in paper["artifacts"]
     ):
         raise CatalogError("release asset index is required for rights-aware catalogs")
+    if enforce_identity:
+        validate_catalog_identity(catalog)
     root = public_root.resolve()
     declared_pages: set[str] = set()
     for paper in papers:

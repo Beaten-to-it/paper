@@ -1,8 +1,7 @@
 import base64
+import copy
 import hashlib
 import json
-import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,10 +11,14 @@ from tools.validate_catalog import CatalogError, validate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = REPO_ROOT / "tools" / "validate_catalog.py"
+SITE_ROOT = REPO_ROOT / "site"
 
 
 class CatalogValidationTests(unittest.TestCase):
+    @staticmethod
+    def production_catalog():
+        return json.loads((SITE_ROOT / "data" / "catalog.json").read_text(encoding="utf-8"))
+
     @staticmethod
     def valid_catalog():
         return {
@@ -169,26 +172,20 @@ class CatalogValidationTests(unittest.TestCase):
                 path = public_root / relative_path
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(content)
-            if catalog.get("version", 1) >= 2:
-                try:
-                    paper_count, artifact_count = validate(
-                        catalog,
-                        public_root,
-                        self.release_index(catalog) if release_assets is None else release_assets,
-                    )
-                    return SimpleNamespace(
-                        returncode=0,
-                        stdout=f"valid catalog: {paper_count} papers, {artifact_count} artifacts\n",
-                        stderr="",
-                    )
-                except (CatalogError, KeyError, TypeError, AttributeError, ValueError) as error:
-                    return SimpleNamespace(returncode=1, stdout="", stderr=f"{error}\n")
-            return subprocess.run(
-                [sys.executable, str(VALIDATOR), str(catalog_path), str(public_root)],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
+            try:
+                paper_count, artifact_count = validate(
+                    catalog,
+                    public_root,
+                    self.release_index(catalog) if catalog.get("version", 1) >= 2 and release_assets is None else release_assets,
+                    enforce_identity=False,
+                )
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=f"valid catalog: {paper_count} papers, {artifact_count} artifacts\n",
+                    stderr="",
+                )
+            except (CatalogError, KeyError, TypeError, AttributeError, ValueError) as error:
+                return SimpleNamespace(returncode=1, stdout="", stderr=f"{error}\n")
 
     def test_accepts_a_valid_public_catalog(self):
         catalog = self.valid_catalog()
@@ -200,6 +197,59 @@ class CatalogValidationTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("1 papers, 1 artifacts", result.stdout)
+
+    def test_production_catalog_identity_is_accepted(self):
+        catalog = self.production_catalog()
+
+        self.assertEqual(
+            validate(catalog, SITE_ROOT, self.release_index(catalog)),
+            (6, 49),
+        )
+
+    def test_rejects_duplicate_approved_paper_group(self):
+        catalog = self.production_catalog()
+        catalog["papers"].append(copy.deepcopy(catalog["papers"][0]))
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_production_catalog_version_downgrade(self):
+        catalog = self.production_catalog()
+        catalog["version"] = 1
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_restricted_paper_downgraded_to_research_design(self):
+        catalog = self.production_catalog()
+        paper = next(item for item in catalog["papers"] if item["slug"] == "battilana-casciaro-2013")
+        paper["kind"] = "research-design"
+        paper["rights"]["source_url"] = "https://example.com/poisoned-rights"
+        source = next(item for item in paper["artifacts"] if item["type"] == "source_paper")
+        source["href"] = "https://doi.org/10.0000/unrelated-paper"
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_source_release_assets_swapped_between_papers(self):
+        catalog = self.production_catalog()
+        kemell = next(item for item in catalog["papers"] if item["slug"] == "kemell-2025")
+        neumann = next(item for item in catalog["papers"] if item["slug"] == "neumann-2026")
+        kemell_source = next(item for item in kemell["artifacts"] if item["type"] == "source_paper")
+        neumann_source = next(item for item in neumann["artifacts"] if item["type"] == "source_paper")
+        published = self.release_index(catalog)
+        for field in ("href", "size_bytes", "sha256"):
+            kemell_source[field], neumann_source[field] = neumann_source[field], kemell_source[field]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, published)
+
+    def test_rejects_duplicate_artifact_id_across_papers(self):
+        catalog = self.production_catalog()
+        catalog["papers"][1]["artifacts"][0]["id"] = catalog["papers"][0]["artifacts"][0]["id"]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
 
     def test_accepts_a_rights_aware_nine_slot_paper(self):
         result = self.run_validator(self.rights_aware_catalog(), self.rights_aware_files())
