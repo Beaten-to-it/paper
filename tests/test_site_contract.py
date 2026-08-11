@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 
@@ -32,6 +33,29 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn("data/catalog.json", script)
         self.assertIn("artifact.status", script)
 
+    def test_final_catalog_has_five_complete_nine_slot_papers_and_four_design_artifacts(self):
+        catalog = json.loads((SITE_ROOT / "data" / "catalog.json").read_text(encoding="utf-8"))
+        papers = [paper for paper in catalog["papers"] if paper["kind"] == "paper"]
+        research_design = [paper for paper in catalog["papers"] if paper["kind"] == "research-design"]
+
+        self.assertEqual(catalog["version"], 2)
+        self.assertEqual(len(papers), 5)
+        self.assertEqual(len(research_design), 1)
+        self.assertTrue(all(len(paper["artifacts"]) == 9 for paper in papers))
+        self.assertEqual(len(research_design[0]["artifacts"]), 4)
+        artifacts = [artifact for paper in catalog["papers"] for artifact in paper["artifacts"]]
+        self.assertEqual(len(artifacts), 49)
+        self.assertTrue(all(artifact["status"] == "complete" for artifact in artifacts))
+
+    def test_homepage_distinguishes_rights_and_locked_companions(self):
+        script = (SITE_ROOT / "assets" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('source_paper: "원문"', script)
+        self.assertIn('korean_version: "한국어본"', script)
+        self.assertIn("rights-badge", script)
+        self.assertIn("protected-viewer.html?id=", script)
+        self.assertIn("암호 입력 후 열기", script)
+        self.assertIn("공식 원문", script)
+
     def test_pages_workflow_deploys_only_the_site_directory(self):
         workflow_path = REPO_ROOT / ".github" / "workflows" / "pages.yml"
         self.assertTrue(workflow_path.is_file(), ".github/workflows/pages.yml must exist")
@@ -39,6 +63,7 @@ class SiteContractTests(unittest.TestCase):
 
         self.assertIn("path: site", workflow)
         self.assertNotIn("path: '.'", workflow)
+        self.assertIn("node --test tests/protected_crypto.test.mjs", workflow)
 
     def test_markdown_artifacts_have_an_internal_reader(self):
         viewer = SITE_ROOT / "viewer.html"
