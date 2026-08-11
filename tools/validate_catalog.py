@@ -1,9 +1,13 @@
+import base64
+import binascii
 import hashlib
 import json
 import posixpath
 import sys
 from pathlib import Path, PurePosixPath
-from urllib.parse import unquote, urlparse
+from urllib.error import URLError
+from urllib.parse import quote, unquote, urlparse
+from urllib.request import Request, urlopen
 
 
 class CatalogError(ValueError):
@@ -17,6 +21,7 @@ RIGHTS_AWARE_STORAGE = ALLOWED_STORAGE | {"external", "protected"}
 ALLOWED_STATUS = {"complete", "missing", "in_progress", "not_applicable", "withheld"}
 ALLOWED_ACCESS = {"public", "official_link_plus_password_encrypted", "public_plus_password_encrypted"}
 ALLOWED_EXTERNAL_HOSTS = {"dash.harvard.edu", "doi.org", "pubsonline.informs.org"}
+ALLOWED_KINDS = {"paper", "research-design"}
 ALLOWED_PROTECTED_FILENAMES = {
     "bc2012-source.enc",
     "bc2012-korean-full.enc",
@@ -96,7 +101,7 @@ def validate_type_and_extension(artifact: dict, storage: str, suffix: str) -> No
         raise CatalogError(f"invalid {storage} artifact type or extension: {artifact['href']}")
 
 
-def validate_release_url(artifact: dict) -> None:
+def validate_release_url(artifact: dict, release_assets: dict[str, dict] | None = None) -> None:
     href = artifact["href"]
     url = urlparse(href)
     decoded_path = unquote(url.path)
@@ -118,6 +123,41 @@ def validate_release_url(artifact: dict) -> None:
     if len(release_parts) != 2 or any(part in {"", ".", ".."} for part in release_parts):
         raise CatalogError(f"unsafe release url: {href}")
     validate_type_and_extension(artifact, "release", PurePosixPath(decoded_path).suffix)
+    if release_assets is not None:
+        published = release_assets.get(href)
+        if (
+            not isinstance(published, dict)
+            or published.get("size_bytes") != artifact["size_bytes"]
+            or str(published.get("sha256", "")).lower() != artifact["sha256"].lower()
+        ):
+            raise CatalogError(f"release asset metadata mismatch: {href}")
+
+
+def fetch_release_asset_index(catalog: dict) -> dict[str, dict]:
+    tags: set[str] = set()
+    for paper in catalog["papers"]:
+        for artifact in paper["artifacts"]:
+            if artifact.get("status") == "complete" and artifact.get("storage") == "release":
+                path = unquote(urlparse(artifact["href"]).path)
+                relative = path[len(RELEASE_PATH_PREFIX):]
+                parts = PurePosixPath(relative).parts
+                if len(parts) == 2:
+                    tags.add(parts[0])
+    assets: dict[str, dict] = {}
+    for tag in tags:
+        api_url = f"https://api.github.com/repos/Beaten-to-it/paper/releases/tags/{quote(tag, safe='')}"
+        request = Request(api_url, headers={"Accept": "application/vnd.github+json", "User-Agent": "paper-catalog-validator"})
+        with urlopen(request, timeout=30) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        for item in payload.get("assets", []):
+            digest = item.get("digest")
+            if not isinstance(digest, str) or not digest.startswith("sha256:"):
+                continue
+            assets[item["browser_download_url"]] = {
+                "size_bytes": item["size"],
+                "sha256": digest.removeprefix("sha256:"),
+            }
+    return assets
 
 
 def validate_external_url(artifact: dict) -> None:
@@ -177,9 +217,28 @@ def validate_protected(artifact: dict, root: Path, declared_pages: set[str]) -> 
         raise CatalogError(f"missing protected file: {href}")
     if path.stat().st_size != metadata["size_bytes"]:
         raise CatalogError(f"protected size mismatch: {href}")
-    actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+    payload = path.read_bytes()
+    actual_hash = hashlib.sha256(payload).hexdigest()
     if actual_hash.lower() != expected_hash.lower():
         raise CatalogError(f"protected sha256 mismatch: {href}")
+    try:
+        container = json.loads(payload.decode("utf-8"))
+        if set(container) != {"version", "algorithm", "kdf", "iterations", "salt", "iv", "ciphertext"}:
+            raise ValueError("unexpected container fields")
+        if (
+            container["version"] != metadata["container_version"]
+            or container["algorithm"] != metadata["algorithm"]
+            or container["kdf"] != metadata["kdf"]
+            or container["iterations"] != metadata["iterations"]
+        ):
+            raise ValueError("container metadata mismatch")
+        salt = base64.b64decode(container["salt"], validate=True)
+        iv = base64.b64decode(container["iv"], validate=True)
+        ciphertext = base64.b64decode(container["ciphertext"], validate=True)
+        if len(salt) != 16 or len(iv) != 12 or len(ciphertext) < 17:
+            raise ValueError("invalid encrypted payload lengths")
+    except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, binascii.Error) as error:
+        raise CatalogError(f"invalid encrypted container: {href}") from error
     declared_pages.add(href_path.as_posix())
 
 
@@ -198,7 +257,10 @@ def validate_rights(paper: dict) -> None:
 
 
 def validate_paper_contract(paper: dict) -> None:
-    if paper["kind"] != "paper":
+    kind = paper["kind"]
+    if kind not in ALLOWED_KINDS:
+        raise CatalogError(f"unsupported paper kind: {kind}")
+    if kind != "paper":
         return
     validate_rights(paper)
     artifacts = paper["artifacts"]
@@ -215,14 +277,46 @@ def validate_paper_contract(paper: dict) -> None:
             raise CatalogError("password-encrypted access requires protected metadata")
     source = next(artifact for artifact in artifacts if artifact["type"] == "source_paper")
     korean = next(artifact for artifact in artifacts if artifact["type"] == "korean_version")
-    if paper["rights"]["redistribution"] == "restricted" and source["storage"] in {"pages", "release"}:
-        raise CatalogError("rights do not allow public redistribution")
-    if (
-        paper["rights"]["translation_publication"] == "restricted"
+    if paper["rights"]["redistribution"] == "restricted":
+        if not (
+            source["storage"] == "external"
+            and source["access"] == "official_link_plus_password_encrypted"
+            and "protected" in source
+        ):
+            raise CatalogError("restricted source requires official link and encrypted companion")
+    elif source["storage"] != "release" or source["access"] != "public" or "protected" in source:
+        raise CatalogError("redistributable source must use public release storage")
+    if paper["rights"]["translation_publication"] == "restricted":
+        if not (
+            korean["storage"] == "pages"
+            and korean["access"] == "public_plus_password_encrypted"
+            and korean.get("translation_kind") == "detailed_study_guide"
+            and "protected" in korean
+        ):
+            raise CatalogError("restricted translation requires public study guide and encrypted companion")
+    elif not (
+        korean["storage"] == "release"
+        and korean["access"] == "public"
         and korean.get("translation_kind") == "full_unofficial"
-        and korean["storage"] in {"pages", "release"}
+        and "protected" not in korean
     ):
-        raise CatalogError("rights do not allow public full translation")
+        raise CatalogError("public translation must use attributed full unofficial release")
+
+
+def validate_page_content(artifact: dict, payload: bytes) -> None:
+    if payload.startswith(b"%PDF-"):
+        raise CatalogError(f"page content does not match declared type: {artifact['href']}")
+    if artifact["type"] == "infographic" and not (
+        payload.startswith(b"\x89PNG\r\n\x1a\n")
+        or payload.startswith(b"\xff\xd8\xff")
+        or (len(payload) >= 12 and payload[:4] in {b"RIFF", b"WEBP"})
+    ):
+        raise CatalogError(f"page content does not match declared type: {artifact['href']}")
+    if artifact["type"] != "infographic":
+        try:
+            payload.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise CatalogError(f"page content does not match declared type: {artifact['href']}") from error
 
 
 def validate_public_inventory(public_root: Path, declared_pages: set[str]) -> None:
@@ -236,11 +330,17 @@ def validate_public_inventory(public_root: Path, declared_pages: set[str]) -> No
                 raise CatalogError(f"undeclared public file: {relative_path}")
 
 
-def validate(catalog: dict, public_root: Path) -> tuple[int, int]:
+def validate(catalog: dict, public_root: Path, release_assets: dict[str, dict] | None = None) -> tuple[int, int]:
     papers = catalog["papers"]
     schema_version = catalog.get("version", 1)
     if isinstance(schema_version, bool) or not isinstance(schema_version, int) or schema_version < 1:
         raise CatalogError("invalid catalog version")
+    if schema_version >= 2 and release_assets is None and any(
+        artifact.get("status") == "complete" and artifact.get("storage") == "release"
+        for paper in papers
+        for artifact in paper["artifacts"]
+    ):
+        raise CatalogError("release asset index is required for rights-aware catalogs")
     root = public_root.resolve()
     declared_pages: set[str] = set()
     for paper in papers:
@@ -269,12 +369,14 @@ def validate(catalog: dict, public_root: Path) -> tuple[int, int]:
                     raise CatalogError(f"missing pages file: {href}")
                 if path.stat().st_size != artifact["size_bytes"]:
                     raise CatalogError(f"size mismatch: {href}")
-                actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+                payload = path.read_bytes()
+                validate_page_content(artifact, payload)
+                actual_hash = hashlib.sha256(payload).hexdigest()
                 if actual_hash.lower() != artifact["sha256"].lower():
                     raise CatalogError(f"sha256 mismatch: {href}")
                 declared_pages.add(href_path.as_posix())
             if artifact["storage"] == "release":
-                validate_release_url(artifact)
+                validate_release_url(artifact, release_assets if schema_version >= 2 else None)
             if artifact["storage"] == "external":
                 validate_external_url(artifact)
             if schema_version >= 2 and "protected" in artifact:
@@ -288,10 +390,11 @@ def main() -> int:
         catalog_path = Path(sys.argv[1])
         public_root = Path(sys.argv[2])
         catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-        paper_count, artifact_count = validate(catalog, public_root)
+        release_assets = fetch_release_asset_index(catalog) if catalog.get("version", 1) >= 2 else None
+        paper_count, artifact_count = validate(catalog, public_root, release_assets)
         print(f"valid catalog: {paper_count} papers, {artifact_count} artifacts")
         return 0
-    except (CatalogError, KeyError, TypeError, AttributeError, json.JSONDecodeError) as error:
+    except (CatalogError, KeyError, TypeError, AttributeError, json.JSONDecodeError, URLError, TimeoutError) as error:
         print(str(error), file=sys.stderr)
         return 1
 
