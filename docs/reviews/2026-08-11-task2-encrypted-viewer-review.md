@@ -45,4 +45,11 @@
 
 ## Targeted closure review
 
-- Status: pending
+- Target commit: `a620d6b7ecbad3a6e7fab277cd9fb4e22b32b41f`
+- Target tree: `c3fd0ab1a6d47d94e81dcb9adfa98794f60fac0b`
+- H1: closed
+- Critical: 0
+- High: 0
+- Gate: passed
+- Evidence: equal-length same-password substitution was rejected by integrity verification; a delayed response completed after `pagehide` without creating a Blob URL; an active Blob URL was revoked exactly once; JavaScript and Python rejected 2,000,001 iterations and a 50 MiB + 1 declaration; Python 43/43 and Node 9/9 passed.
+- Residual Medium: if a response omits truthful `Content-Length`, `response.arrayBuffer()` can buffer an oversized body before the exact-size check rejects it. Integrity remains fail-closed; streaming is deferred as availability hardening.
