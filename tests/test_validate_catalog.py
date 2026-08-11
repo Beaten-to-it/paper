@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -358,6 +359,27 @@ class CatalogValidationTests(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("page content does not match declared type", result.stderr)
+
+    def test_rejects_complete_pdf_signature_at_any_payload_offset(self):
+        pdf_body = (
+            b"%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\n"
+            b"trailer\n<< /Root 1 0 R >>\n%%EOF\n"
+        )
+        for offset in (0, 1, 512, 1019, 1020, 1023, 1024, 4096):
+            with self.subTest(offset=offset):
+                payload = (b" " * offset) + pdf_body
+                catalog = self.valid_catalog()
+                artifact = catalog["papers"][0]["artifacts"][0]
+                artifact.update({
+                    "href": f"downloads/offset-{offset}-pdf.md",
+                    "size_bytes": len(payload),
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                })
+
+                result = self.run_validator(catalog, {artifact["href"]: payload})
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("page content does not match declared type", result.stderr)
 
     def test_rejects_third_party_source_pdfs(self):
         catalog = self.valid_catalog()

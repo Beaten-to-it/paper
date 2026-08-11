@@ -303,8 +303,15 @@ def validate_paper_contract(paper: dict) -> None:
         raise CatalogError("public translation must use attributed full unofficial release")
 
 
+def looks_like_pdf(payload: bytes) -> bool:
+    header_index = payload.find(b"%PDF-")
+    if header_index < 0:
+        return False
+    return header_index <= 1023 or payload.find(b"%%EOF", header_index + 5) >= 0
+
+
 def validate_page_content(artifact: dict, payload: bytes) -> None:
-    if b"%PDF-" in payload[:1024]:
+    if looks_like_pdf(payload):
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
     if artifact["type"] == "infographic" and not (
         payload.startswith(b"\x89PNG\r\n\x1a\n")
