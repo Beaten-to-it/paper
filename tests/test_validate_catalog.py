@@ -329,6 +329,31 @@ class CatalogValidationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("invalid encrypted container", result.stderr)
 
+    def test_rejects_protected_container_with_excessive_kdf_work(self):
+        catalog = self.restricted_rights_catalog()
+        source = next(a for a in catalog["papers"][0]["artifacts"] if a["type"] == "source_paper")
+        container = json.dumps({
+            "version": 1,
+            "algorithm": "AES-256-GCM",
+            "kdf": "PBKDF2-HMAC-SHA-256",
+            "iterations": 2_000_001,
+            "salt": "AAAAAAAAAAAAAAAAAAAAAA==",
+            "iv": "AAAAAAAAAAAAAAAA",
+            "ciphertext": "AAAAAAAAAAAAAAAAAAAAAAAA",
+        }, separators=(",", ":")).encode()
+        source["protected"].update({
+            "iterations": 2_000_001,
+            "size_bytes": len(container),
+            "sha256": hashlib.sha256(container).hexdigest(),
+        })
+        files = self.restricted_rights_files()
+        files["protected/bc2012-source.enc"] = container
+
+        result = self.run_validator(catalog, files)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid protected encryption metadata", result.stderr)
+
     def test_rejects_pdf_bytes_disguised_as_markdown(self):
         catalog = self.valid_catalog()
         artifact = catalog["papers"][0]["artifacts"][0]

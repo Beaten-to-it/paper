@@ -9,6 +9,7 @@ const CONTAINER_FIELDS = [
 ];
 
 const textEncoder = new TextEncoder();
+const MAX_PBKDF2_ITERATIONS = 2_000_000;
 
 function requireCrypto() {
   if (!globalThis.crypto?.subtle || !globalThis.crypto?.getRandomValues) {
@@ -65,7 +66,11 @@ function validateContainer(value) {
   if (value.kdf !== "PBKDF2-HMAC-SHA-256") {
     throw new Error("unsupported key derivation function");
   }
-  if (!Number.isSafeInteger(value.iterations) || value.iterations < 600_000) {
+  if (
+    !Number.isSafeInteger(value.iterations)
+    || value.iterations < 600_000
+    || value.iterations > MAX_PBKDF2_ITERATIONS
+  ) {
     throw new Error("invalid PBKDF2 iterations");
   }
   const salt = base64ToBytes(value.salt, "salt");
@@ -123,7 +128,11 @@ export async function encryptBytes(plaintext, password, options = {}) {
     throw new Error("plaintext must be a Uint8Array");
   }
   const iterations = options.iterations ?? 600_000;
-  if (!Number.isSafeInteger(iterations) || iterations < 600_000) {
+  if (
+    !Number.isSafeInteger(iterations)
+    || iterations < 600_000
+    || iterations > MAX_PBKDF2_ITERATIONS
+  ) {
     throw new Error("invalid PBKDF2 iterations");
   }
   const webCrypto = requireCrypto();

@@ -227,9 +227,15 @@ def validate_protected(artifact: dict, root: Path, declared_pages: set[str]) -> 
         or isinstance(metadata["iterations"], bool)
         or not isinstance(metadata["iterations"], int)
         or metadata["iterations"] < 600_000
+        or metadata["iterations"] > 2_000_000
     ):
         raise CatalogError("invalid protected encryption metadata")
-    if isinstance(metadata["size_bytes"], bool) or not isinstance(metadata["size_bytes"], int) or metadata["size_bytes"] <= 0:
+    if (
+        isinstance(metadata["size_bytes"], bool)
+        or not isinstance(metadata["size_bytes"], int)
+        or metadata["size_bytes"] <= 0
+        or metadata["size_bytes"] > PAGES_FILE_LIMIT
+    ):
         raise CatalogError("protected artifacts require a positive integer size_bytes")
     expected_hash = metadata["sha256"]
     if not isinstance(expected_hash, str) or len(expected_hash) != 64 or any(character not in "0123456789abcdefABCDEF" for character in expected_hash):

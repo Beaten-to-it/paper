@@ -63,6 +63,7 @@ test("rejects malformed metadata and invalid base64 lengths", () => {
 
   assert.throws(() => parseContainer(JSON.stringify({...validShape, extra: true})), /container fields/);
   assert.throws(() => parseContainer(JSON.stringify({...validShape, iterations: 599999})), /iterations/);
+  assert.throws(() => parseContainer(JSON.stringify({...validShape, iterations: 2000001})), /iterations/);
   assert.throws(() => parseContainer(JSON.stringify({...validShape, salt: "AAAA"})), /salt/);
   assert.throws(() => parseContainer("not json"), /JSON/);
 });
