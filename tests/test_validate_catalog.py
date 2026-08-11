@@ -341,6 +341,24 @@ class CatalogValidationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("page content does not match declared type", result.stderr)
 
+    def test_rejects_pdf_with_leading_byte_disguised_as_markdown(self):
+        payload = (
+            b"\n%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\n"
+            b"trailer\n<< /Root 1 0 R >>\n%%EOF\n"
+        )
+        catalog = self.valid_catalog()
+        artifact = catalog["papers"][0]["artifacts"][0]
+        artifact.update({
+            "href": "downloads/offset-pdf-disguised-as-analysis.md",
+            "size_bytes": 78,
+            "sha256": "9f74b4414e4452e22b249537e5a89cf67025c695b31cc681e9b7f24785f72d19",
+        })
+
+        result = self.run_validator(catalog, {"downloads/offset-pdf-disguised-as-analysis.md": payload})
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("page content does not match declared type", result.stderr)
+
     def test_rejects_third_party_source_pdfs(self):
         catalog = self.valid_catalog()
         catalog["papers"][0]["artifacts"][0].update(

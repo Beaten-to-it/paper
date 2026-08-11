@@ -304,7 +304,7 @@ def validate_paper_contract(paper: dict) -> None:
 
 
 def validate_page_content(artifact: dict, payload: bytes) -> None:
-    if payload.startswith(b"%PDF-"):
+    if b"%PDF-" in payload[:1024]:
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
     if artifact["type"] == "infographic" and not (
         payload.startswith(b"\x89PNG\r\n\x1a\n")
