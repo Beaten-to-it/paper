@@ -1,5 +1,9 @@
 .playwright-cli/
 .worktrees/
 output/playwright/
+output/private-translations/
+output/translations/
+output/release-assets/
+output/rendered/
 __pycache__/
 *.pyc
