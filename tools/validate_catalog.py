@@ -3,7 +3,9 @@ import binascii
 import hashlib
 import json
 import posixpath
+import struct
 import sys
+import zlib
 from pathlib import Path, PurePosixPath
 from urllib.error import URLError
 from urllib.parse import quote, unquote, urlparse
@@ -22,6 +24,27 @@ ALLOWED_STATUS = {"complete", "missing", "in_progress", "not_applicable", "withh
 ALLOWED_ACCESS = {"public", "official_link_plus_password_encrypted", "public_plus_password_encrypted"}
 ALLOWED_EXTERNAL_HOSTS = {"dash.harvard.edu", "doi.org", "pubsonline.informs.org"}
 ALLOWED_KINDS = {"paper", "research-design"}
+RIGHTS_PROFILES = {
+    "kemell-2025": {
+        "rights": {"license": "CC-BY-4.0", "redistribution": "allowed", "translation_publication": "allowed_with_attribution", "source_url": "https://doi.org/10.1016/j.infsof.2025.107805", "checked_at": "2026-08-11"},
+    },
+    "neumann-2026": {
+        "rights": {"license": "CC-BY-4.0", "redistribution": "allowed", "translation_publication": "allowed_with_attribution", "source_url": "https://doi.org/10.1007/978-3-032-22375-3_18", "checked_at": "2026-08-11"},
+    },
+    "golgeci-2025": {
+        "rights": {"license": "CC-BY-4.0", "redistribution": "allowed", "translation_publication": "allowed_with_attribution", "source_url": "https://doi.org/10.1016/j.hrmr.2024.101075", "checked_at": "2026-08-11"},
+    },
+    "battilana-casciaro-2012": {
+        "rights": {"license": "author-manuscript-policy", "redistribution": "restricted", "translation_publication": "restricted", "source_url": "https://dash.harvard.edu/handle/1/9544459", "checked_at": "2026-08-11"},
+        "official_source_url": "https://doi.org/10.5465/amj.2009.0891",
+        "protected": {"source_paper": "protected/bc2012-source.enc", "korean_version": "protected/bc2012-korean-full.enc"},
+    },
+    "battilana-casciaro-2013": {
+        "rights": {"license": "all-rights-reserved", "redistribution": "restricted", "translation_publication": "restricted", "source_url": "https://pubsonline.informs.org/authorportal/rights-permissions", "checked_at": "2026-08-11"},
+        "official_source_url": "https://doi.org/10.1287/mnsc.1120.1583",
+        "protected": {"source_paper": "protected/bc2013-source.enc", "korean_version": "protected/bc2013-korean-full.enc"},
+    },
+}
 ALLOWED_PROTECTED_FILENAMES = {
     "bc2012-source.enc",
     "bc2012-korean-full.enc",
@@ -41,7 +64,7 @@ PAPER_SLOT_TYPES = {
 }
 PAGES_EXTENSIONS = {
     "analysis": {".md"},
-    "infographic": {".jpeg", ".jpg", ".png", ".webp"},
+    "infographic": {".png"},
     "korean_version": {".md"},
     "notebooklm_prompt": {".md"},
     "notebooklm_run": {".md"},
@@ -254,6 +277,9 @@ def validate_rights(paper: dict) -> None:
     source_url = urlparse(rights["source_url"])
     if source_url.scheme != "https" or not source_url.hostname:
         raise CatalogError("invalid rights source url")
+    profile = RIGHTS_PROFILES.get(paper["slug"])
+    if profile is None or rights != profile["rights"]:
+        raise CatalogError("rights metadata does not match approved paper profile")
 
 
 def validate_paper_contract(paper: dict) -> None:
@@ -275,8 +301,13 @@ def validate_paper_contract(paper: dict) -> None:
             raise CatalogError("public artifacts must not declare protected content")
         if artifact["access"] != "public" and "protected" not in artifact:
             raise CatalogError("password-encrypted access requires protected metadata")
+        if artifact["type"] not in {"source_paper", "korean_version"} and (
+            artifact["access"] != "public" or "protected" in artifact
+        ):
+            raise CatalogError("only source and Korean version may declare protected access")
     source = next(artifact for artifact in artifacts if artifact["type"] == "source_paper")
     korean = next(artifact for artifact in artifacts if artifact["type"] == "korean_version")
+    profile = RIGHTS_PROFILES[paper["slug"]]
     if paper["rights"]["redistribution"] == "restricted":
         if not (
             source["storage"] == "external"
@@ -284,6 +315,8 @@ def validate_paper_contract(paper: dict) -> None:
             and "protected" in source
         ):
             raise CatalogError("restricted source requires official link and encrypted companion")
+        if source["href"] != profile["official_source_url"]:
+            raise CatalogError("official source does not match approved paper profile")
     elif source["storage"] != "release" or source["access"] != "public" or "protected" in source:
         raise CatalogError("redistributable source must use public release storage")
     if paper["rights"]["translation_publication"] == "restricted":
@@ -301,23 +334,71 @@ def validate_paper_contract(paper: dict) -> None:
         and "protected" not in korean
     ):
         raise CatalogError("public translation must use attributed full unofficial release")
+    for artifact in (source, korean):
+        if "protected" in artifact and artifact["protected"]["href"] != profile["protected"][artifact["type"]]:
+            raise CatalogError("protected companion does not match paper slot")
+
+
+def is_valid_png(payload: bytes) -> bool:
+    if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
+        return False
+    offset = 8
+    chunk_index = 0
+    width = height = bit_depth = color_type = None
+    idat_parts: list[bytes] = []
+    saw_iend = False
+    while offset + 12 <= len(payload):
+        length = struct.unpack(">I", payload[offset:offset + 4])[0]
+        end = offset + 12 + length
+        if end > len(payload):
+            return False
+        chunk_type = payload[offset + 4:offset + 8]
+        chunk_data = payload[offset + 8:offset + 8 + length]
+        expected_crc = struct.unpack(">I", payload[offset + 8 + length:end])[0]
+        if zlib.crc32(chunk_type + chunk_data) & 0xFFFFFFFF != expected_crc:
+            return False
+        if chunk_index == 0:
+            if chunk_type != b"IHDR" or length != 13:
+                return False
+            width, height, bit_depth, color_type, compression, filter_method, interlace = struct.unpack(">IIBBBBB", chunk_data)
+            if width <= 0 or height <= 0 or compression != 0 or filter_method != 0 or interlace != 0:
+                return False
+            valid_depths = {0: {1, 2, 4, 8, 16}, 2: {8, 16}, 3: {1, 2, 4, 8}, 4: {8, 16}, 6: {8, 16}}
+            if color_type not in valid_depths or bit_depth not in valid_depths[color_type]:
+                return False
+        elif chunk_type == b"IDAT":
+            idat_parts.append(chunk_data)
+        elif chunk_type == b"IEND":
+            if length != 0 or end != len(payload):
+                return False
+            saw_iend = True
+            break
+        offset = end
+        chunk_index += 1
+    if not saw_iend or not idat_parts or None in {width, height, bit_depth, color_type}:
+        return False
+    channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[color_type]
+    row_bytes = (width * channels * bit_depth + 7) // 8
+    expected_size = height * (row_bytes + 1)
+    if expected_size <= 0 or expected_size > 200 * 1024 * 1024:
+        return False
+    try:
+        decompressor = zlib.decompressobj()
+        decoded = decompressor.decompress(b"".join(idat_parts), expected_size + 1)
+        decoded += decompressor.flush()
+    except zlib.error:
+        return False
+    return len(decoded) == expected_size and decompressor.eof and not decompressor.unused_data
 
 
 def looks_like_pdf(payload: bytes) -> bool:
-    header_index = payload.find(b"%PDF-")
-    if header_index < 0:
-        return False
-    return header_index <= 1023 or payload.find(b"%%EOF", header_index + 5) >= 0
+    return payload.find(b"%PDF-") >= 0
 
 
 def validate_page_content(artifact: dict, payload: bytes) -> None:
     if looks_like_pdf(payload):
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
-    if artifact["type"] == "infographic" and not (
-        payload.startswith(b"\x89PNG\r\n\x1a\n")
-        or payload.startswith(b"\xff\xd8\xff")
-        or (len(payload) >= 12 and payload[:4] in {b"RIFF", b"WEBP"})
-    ):
+    if artifact["type"] == "infographic" and not is_valid_png(payload):
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
     if artifact["type"] != "infographic":
         try:

@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import subprocess
@@ -56,13 +57,13 @@ class CatalogValidationTests(unittest.TestCase):
             {"id":"audio","type":"audio","title":"음성","href":release + "audio.m4a","storage":"release","size_bytes":1,"sha256":"c" * 64,"status":"complete","provenance":"notebooklm_generated","access":"public"},
             {"id":"slides","type":"slides","title":"PPT","href":release + "slides.pptx","storage":"release","size_bytes":1,"sha256":"d" * 64,"status":"complete","provenance":"researcher_generated","access":"public"},
             {"id":"slide-pdf","type":"slide_pdf","title":"PDF","href":release + "slides.pdf","storage":"release","size_bytes":1,"sha256":"e" * 64,"status":"complete","provenance":"researcher_generated","access":"public"},
-            {"id":"infographic","type":"infographic","title":"인포그래픽","href":"downloads/graphic.png","storage":"pages","size_bytes":8,"sha256":"4c4b6a3be1314ab86138bef4314dde022e600960d8689a2c8f8631802d20dab6","status":"complete","provenance":"researcher_generated","access":"public"},
+            {"id":"infographic","type":"infographic","title":"인포그래픽","href":"downloads/graphic.png","storage":"pages","size_bytes":68,"sha256":"431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460","status":"complete","provenance":"researcher_generated","access":"public"},
         ]
         return {
             "version": 2,
             "updated": "2026-08-11",
             "papers": [{
-                "slug": "example-2026",
+                "slug": "kemell-2025",
                 "kind": "paper",
                 "citation": "Example et al. (2026)",
                 "year": 2026,
@@ -72,7 +73,7 @@ class CatalogValidationTests(unittest.TestCase):
                     "license": "CC-BY-4.0",
                     "redistribution": "allowed",
                     "translation_publication": "allowed_with_attribution",
-                    "source_url": "https://doi.org/10.0000/example",
+                    "source_url": "https://doi.org/10.1016/j.infsof.2025.107805",
                     "checked_at": "2026-08-11",
                 },
                 "artifacts": artifacts,
@@ -85,7 +86,7 @@ class CatalogValidationTests(unittest.TestCase):
             "downloads/analysis.md": b"analysis",
             "downloads/prompt.md": b"prompt",
             "downloads/run.md": b"run",
-            "downloads/graphic.png": bytes([137, 80, 78, 71, 13, 10, 26, 10]),
+            "downloads/graphic.png": base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="),
         }
 
     @classmethod
@@ -213,7 +214,7 @@ class CatalogValidationTests(unittest.TestCase):
         result = self.run_validator(catalog, self.rights_aware_files())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("restricted source requires official link and encrypted companion", result.stderr)
+        self.assertIn("rights metadata does not match approved paper profile", result.stderr)
 
     def test_rejects_wrong_paper_slot_set(self):
         catalog = self.rights_aware_catalog()
@@ -237,7 +238,7 @@ class CatalogValidationTests(unittest.TestCase):
         result = self.run_validator(catalog, self.restricted_rights_files())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unsafe external url", result.stderr)
+        self.assertIn("official source does not match approved paper profile", result.stderr)
 
     def test_rejects_protected_path_traversal(self):
         catalog = self.restricted_rights_catalog()
@@ -247,7 +248,7 @@ class CatalogValidationTests(unittest.TestCase):
         result = self.run_validator(catalog, self.restricted_rights_files())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unsafe protected path", result.stderr)
+        self.assertIn("protected companion does not match paper slot", result.stderr)
 
     def test_rejects_unknown_kind_in_rights_aware_catalog(self):
         catalog = self.rights_aware_catalog()
@@ -380,6 +381,86 @@ class CatalogValidationTests(unittest.TestCase):
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("page content does not match declared type", result.stderr)
+
+    def test_rejects_header_only_png_as_complete_infographic(self):
+        catalog = self.rights_aware_catalog()
+        artifact = next(a for a in catalog["papers"][0]["artifacts"] if a["type"] == "infographic")
+        artifact.update({
+            "size_bytes": 8,
+            "sha256": "4c4b6a3be1314ab86138bef4314dde022e600960d8689a2c8f8631802d20dab6",
+        })
+        files = self.rights_aware_files()
+        files["downloads/graphic.png"] = bytes([137, 80, 78, 71, 13, 10, 26, 10])
+
+        result = self.run_validator(catalog, files)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("page content does not match declared type", result.stderr)
+
+    def test_rejects_invalid_riff_payload_as_webp_infographic(self):
+        payload = b"RIFFnot-WEBP"
+        catalog = self.rights_aware_catalog()
+        artifact = next(a for a in catalog["papers"][0]["artifacts"] if a["type"] == "infographic")
+        artifact.update({
+            "href": "downloads/graphic.webp",
+            "size_bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        })
+        files = self.rights_aware_files()
+        files.pop("downloads/graphic.png")
+        files["downloads/graphic.webp"] = payload
+
+        result = self.run_validator(catalog, files)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid pages artifact type or extension", result.stderr)
+
+    def test_rejects_unapproved_rights_profile(self):
+        catalog = self.rights_aware_catalog()
+        catalog["papers"][0]["rights"].update({
+            "license": "all-rights-reserved",
+            "source_url": "https://evil.example/pretend-rights",
+        })
+
+        result = self.run_validator(catalog, self.rights_aware_files())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("rights metadata does not match approved paper profile", result.stderr)
+
+    def test_rejects_unrelated_official_doi_for_restricted_paper(self):
+        catalog = self.restricted_rights_catalog()
+        source = next(a for a in catalog["papers"][0]["artifacts"] if a["type"] == "source_paper")
+        source["href"] = "https://doi.org/10.0000/unrelated-paper"
+
+        result = self.run_validator(catalog, self.restricted_rights_files())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("official source does not match approved paper profile", result.stderr)
+
+    def test_rejects_locked_access_on_analysis_slot(self):
+        catalog = self.restricted_rights_catalog()
+        paper = catalog["papers"][0]
+        source = next(a for a in paper["artifacts"] if a["type"] == "source_paper")
+        analysis = next(a for a in paper["artifacts"] if a["type"] == "analysis")
+        analysis["access"] = "official_link_plus_password_encrypted"
+        analysis["protected"] = dict(source["protected"])
+
+        result = self.run_validator(catalog, self.restricted_rights_files())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("only source and Korean version may declare protected access", result.stderr)
+
+    def test_rejects_swapped_source_and_translation_companions(self):
+        catalog = self.restricted_rights_catalog()
+        paper = catalog["papers"][0]
+        source = next(a for a in paper["artifacts"] if a["type"] == "source_paper")
+        korean = next(a for a in paper["artifacts"] if a["type"] == "korean_version")
+        source["protected"], korean["protected"] = korean["protected"], source["protected"]
+
+        result = self.run_validator(catalog, self.restricted_rights_files())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("protected companion does not match paper slot", result.stderr)
 
     def test_rejects_third_party_source_pdfs(self):
         catalog = self.valid_catalog()
