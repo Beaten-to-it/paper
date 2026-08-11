@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; frame-src blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>Paper Lab 비공개 PDF</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="viewer-page protected-page">
+  <header class="viewer-header">
+    <a href="index.html">← Paper Lab</a>
+    <span>비공개 개인 학습 자료</span>
+  </header>
+  <main class="protected-main">
+    <section class="unlock-panel" aria-labelledby="protected-title">
+      <p class="section-kicker">MEMORY-ONLY VIEWER</p>
+      <h1 id="protected-title">비공개 PDF</h1>
+      <p id="protected-status" role="status">자료 정보를 확인하는 중입니다.</p>
+      <form id="unlock-form" class="unlock-form" hidden>
+        <label for="private-password">비밀번호</label>
+        <div class="unlock-form__row">
+          <input id="private-password" type="password" autocomplete="off" required>
+          <button id="unlock-button" type="submit">암호 입력 후 열기</button>
+          <button id="relock-button" type="button" class="button-secondary" hidden>다시 잠그기</button>
+        </div>
+      </form>
+      <p class="security-note">비밀번호와 복호화된 PDF는 서버로 전송하거나 브라우저 저장소에 보관하지 않습니다. 다만 이 방식은 서버 인증이 아니며, 네 자리 비밀번호는 내려받은 암호문에 대한 오프라인 대입 공격에 취약합니다.</p>
+    </section>
+    <iframe id="protected-frame" class="protected-frame" title="복호화된 비공개 PDF" referrerpolicy="no-referrer" hidden></iframe>
+  </main>
+  <script type="module" src="assets/protected-viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+site/**/*.css text eol=lf
+site/**/*.html text eol=lf
+site/**/*.js text eol=lf
+site/**/*.json text eol=lf
+site/**/*.md text eol=lf
+site/**/*.svg text eol=lf

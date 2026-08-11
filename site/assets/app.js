@@ -7,6 +7,8 @@ const statusLabels = {
 };
 
 const typeLabels = {
+  source_paper: "원문",
+  korean_version: "한국어본",
   analysis: "분석",
   notebooklm_prompt: "NotebookLM 프롬프트",
   notebooklm_run: "NotebookLM 실행기록",
@@ -26,14 +28,40 @@ const escapeHtml = (value) => String(value)
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
 
-function artifactHtml(artifact) {
+function rightsBadges(paper, artifact) {
+  if (!paper.rights) return "";
+  const labels = [];
+  if (artifact.type === "source_paper") {
+    labels.push(paper.rights.redistribution === "allowed" ? "CC BY 4.0" : "공식 원문 링크");
+  }
+  if (artifact.type === "korean_version") {
+    labels.push(artifact.translation_kind === "full_unofficial" ? "비공식 전문 번역" : "전문 번역 아님");
+  }
+  if (artifact.protected) labels.push("암호 필요");
+  return labels.length
+    ? `<div class="artifact__badges">${labels.map((label) => `<span class="rights-badge">${escapeHtml(label)}</span>`).join("")}</div>`
+    : "";
+}
+
+function artifactActions(artifact) {
+  if (artifact.status !== "complete") return "";
+  const actions = [];
+  if (artifact.href?.endsWith(".md")) {
+    actions.push(`<a href="viewer.html?file=${encodeURIComponent(artifact.href)}">사이트에서 읽기</a>`);
+    actions.push(`<a href="${escapeHtml(artifact.href)}" download>원본 받기</a>`);
+  } else if (artifact.storage === "external") {
+    actions.push(`<a href="${escapeHtml(artifact.href)}" target="_blank" rel="noopener noreferrer">공식 원문 열기</a>`);
+  } else if (artifact.href) {
+    actions.push(`<a href="${escapeHtml(artifact.href)}">열기 · 다운로드</a>`);
+  }
+  if (artifact.protected) {
+    actions.push(`<a class="locked-action" href="protected-viewer.html?id=${encodeURIComponent(artifact.id)}">암호 입력 후 열기</a>`);
+  }
+  return actions.length ? `<div class="artifact__actions">${actions.join("")}</div>` : "";
+}
+
+function artifactHtml(artifact, paper) {
   const status = statusLabels[artifact.status] || artifact.status;
-  const isMarkdown = artifact.status === "complete" && artifact.href?.endsWith(".md");
-  const action = isMarkdown
-    ? `<div class="artifact__actions"><a href="viewer.html?file=${encodeURIComponent(artifact.href)}">사이트에서 읽기</a><a href="${escapeHtml(artifact.href)}" download>원본 받기</a></div>`
-    : artifact.status === "complete" && artifact.href
-      ? `<a href="${escapeHtml(artifact.href)}">열기 · 다운로드</a>`
-      : "";
   const player = artifact.status === "complete" && artifact.type === "audio"
     ? `<audio controls preload="none" src="${escapeHtml(artifact.href)}"></audio>`
     : "";
@@ -46,7 +74,7 @@ function artifactHtml(artifact) {
       <span class="status status--${escapeHtml(artifact.status)}">${escapeHtml(status)}</span>
     </div>
     <p>${escapeHtml(artifact.title)}</p>
-    ${preview}${player}${action}
+    ${rightsBadges(paper, artifact)}${preview}${player}${artifactActions(artifact)}
   </article>`;
 }
 
@@ -62,7 +90,7 @@ function paperHtml(paper, selectedType) {
       </div>
       <span class="paper-badge">${escapeHtml(paper.kind === "research-design" ? "연구설계" : "논문")}</span>
     </header>
-    <div class="artifact-grid">${artifacts.map(artifactHtml).join("")}</div>
+    <div class="artifact-grid">${artifacts.map((artifact) => artifactHtml(artifact, paper)).join("")}</div>
   </article>`;
 }
 

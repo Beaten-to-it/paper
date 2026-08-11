@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "updated": "2026-08-11",
   "papers": [
     {
@@ -10,14 +10,123 @@
       "title": "Still just personal assistants?",
       "summary": "7개 SW 기업에서 하향식·상향식·혼합형 GenAI 도입과 공식 라이선스 밖 실험의 병존을 보여 주는 현상 앵커.",
       "artifacts": [
-        {"id":"kemell-analysis","type":"analysis","title":"비판적 논문 분석 카드","href":"downloads/kemell-2025/analysis.md","storage":"pages","size_bytes":11926,"sha256":"e729e78fc01dffcdccae005f03cec99fdc44c264e781ead6cb8d916ef6c3b8d8","status":"complete","provenance":"researcher_generated"},
-        {"id":"kemell-prompt","type":"notebooklm_prompt","title":"한국어 음성·PPT·검증용 NotebookLM 프롬프트","href":"downloads/kemell-2025/notebooklm-prompts.md","storage":"pages","size_bytes":6995,"sha256":"9d75e71bd24dc2df58e2b58b5b42e8cf7ea6419a3c1d0880faca91bb45f13982","status":"complete","provenance":"researcher_generated"},
-        {"id":"kemell-run","type":"notebooklm_run","title":"단일 원문 기반 NotebookLM 실행·검증 기록","href":"downloads/kemell-2025/notebooklm-run.md","storage":"pages","size_bytes":2998,"sha256":"47147f1ba777980ef26e8138688a92c964b8de0f1aa58271507375021ad882d3","status":"complete","provenance":"researcher_generated"},
-        {"id":"kemell-audio","type":"audio","title":"한국어 심층 분석 오디오 · 19분 54초","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-Korean-deep-dive.m4a","storage":"release","size_bytes":38461029,"sha256":"ffe042ff800d20e8e7314dfc4f4a0d1b23dea8f05cd736198fccd9b88542f8f6","status":"complete","provenance":"notebooklm_generated"},
-        {"id":"kemell-slides","type":"slides","title":"편집 가능한 11장 박사 세미나 PPT","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-seminar-deck.pptx","storage":"release","size_bytes":56123,"sha256":"53bdd1203ac76787447aa7368f051eead459aa79cb9cbf38fdd976a7eb794646","status":"complete","provenance":"researcher_generated"},
-        {"id":"kemell-slide-pdf","type":"slide_pdf","title":"11쪽 세미나 슬라이드 PDF","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-seminar-deck.pdf","storage":"release","size_bytes":216545,"sha256":"8d1d75eac84faf069e9503ada26919a5c852abc4a5f66b3be0740bd76073bf70","status":"complete","provenance":"researcher_generated"},
-        {"id":"kemell-infographic","type":"infographic","title":"공식 정책과 현장 실험의 병존 인포그래픽","href":"downloads/kemell-2025/infographic.png","storage":"pages","size_bytes":1493305,"sha256":"1d5bfc99e9bc94c8e86e347573f61542b01832ae38b58dc7e54e4cd240fc1e9c","status":"complete","provenance":"researcher_generated"}
-      ]
+        {
+          "id": "kemell-2025-source",
+          "type": "source_paper",
+          "title": "CC BY 4.0 원문 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Kemell-et-al-2025-Still-just-personal-assistants.pdf",
+          "storage": "release",
+          "size_bytes": 732839,
+          "sha256": "720aa0a7f7815931451bbde10978dc1fb29518a2270cec92ebaf402bedc7ce33",
+          "status": "complete",
+          "provenance": "publisher",
+          "access": "public"
+        },
+        {
+          "id": "kemell-2025-korean",
+          "type": "korean_version",
+          "title": "AI 보조 비공식 한국어 전문 번역",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Kemell-2025-Korean-unofficial-translation.pdf",
+          "storage": "release",
+          "size_bytes": 263536,
+          "sha256": "1fa026ffbf646adad8f8ceb15752fbeceaf2a11a433051609d48e37a2db974e5",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public",
+          "translation_kind": "full_unofficial"
+        },
+        {
+          "id": "kemell-analysis",
+          "type": "analysis",
+          "title": "비판적 논문 분석 카드",
+          "href": "downloads/kemell-2025/analysis.md",
+          "storage": "pages",
+          "size_bytes": 11926,
+          "sha256": "e729e78fc01dffcdccae005f03cec99fdc44c264e781ead6cb8d916ef6c3b8d8",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-prompt",
+          "type": "notebooklm_prompt",
+          "title": "한국어 음성·PPT·검증용 NotebookLM 프롬프트",
+          "href": "downloads/kemell-2025/notebooklm-prompts.md",
+          "storage": "pages",
+          "size_bytes": 6995,
+          "sha256": "9d75e71bd24dc2df58e2b58b5b42e8cf7ea6419a3c1d0880faca91bb45f13982",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-run",
+          "type": "notebooklm_run",
+          "title": "단일 원문 기반 NotebookLM 실행·검증 기록",
+          "href": "downloads/kemell-2025/notebooklm-run.md",
+          "storage": "pages",
+          "size_bytes": 2998,
+          "sha256": "47147f1ba777980ef26e8138688a92c964b8de0f1aa58271507375021ad882d3",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-audio",
+          "type": "audio",
+          "title": "한국어 심층 분석 오디오 · 19분 54초",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-Korean-deep-dive.m4a",
+          "storage": "release",
+          "size_bytes": 38461029,
+          "sha256": "ffe042ff800d20e8e7314dfc4f4a0d1b23dea8f05cd736198fccd9b88542f8f6",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-slides",
+          "type": "slides",
+          "title": "편집 가능한 11장 박사 세미나 PPT",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-seminar-deck.pptx",
+          "storage": "release",
+          "size_bytes": 56123,
+          "sha256": "53bdd1203ac76787447aa7368f051eead459aa79cb9cbf38fdd976a7eb794646",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-slide-pdf",
+          "type": "slide_pdf",
+          "title": "11쪽 세미나 슬라이드 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Kemell-2025-seminar-deck.pdf",
+          "storage": "release",
+          "size_bytes": 216545,
+          "sha256": "8d1d75eac84faf069e9503ada26919a5c852abc4a5f66b3be0740bd76073bf70",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-infographic",
+          "type": "infographic",
+          "title": "공식 정책과 현장 실험의 병존 인포그래픽",
+          "href": "downloads/kemell-2025/infographic.png",
+          "storage": "pages",
+          "size_bytes": 1493305,
+          "sha256": "1d5bfc99e9bc94c8e86e347573f61542b01832ae38b58dc7e54e4cd240fc1e9c",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        }
+      ],
+      "rights": {
+        "license": "CC-BY-4.0",
+        "redistribution": "allowed",
+        "translation_publication": "allowed_with_attribution",
+        "source_url": "https://doi.org/10.1016/j.infsof.2025.107805",
+        "checked_at": "2026-08-11"
+      }
     },
     {
       "slug": "neumann-2026",
@@ -27,14 +136,123 @@
       "title": "Between Policy and Practice",
       "summary": "애자일 SW 팀의 GenAI 도입에서 공식 정책과 실제 사용 사이의 간극을 보여 주는 후속 현상 논문.",
       "artifacts": [
-        {"id":"neumann-analysis","type":"analysis","title":"비판적 논문 분석 카드","href":"downloads/neumann-2026/analysis.md","storage":"pages","size_bytes":15070,"sha256":"689ef4a9fca789e422378bcd015e6f7555bf8cdc76ee6dfce18df0de3766016a","status":"complete","provenance":"researcher_generated"},
-        {"id":"neumann-prompt","type":"notebooklm_prompt","title":"한국어 음성·PPT·검증용 NotebookLM 프롬프트","href":"downloads/neumann-2026/notebooklm-prompts.md","storage":"pages","size_bytes":8003,"sha256":"66e495c3ec940d56f8603ce7669744fc7707e09b75a4e435628f9026d3b46330","status":"complete","provenance":"researcher_generated"},
-        {"id":"neumann-run","type":"notebooklm_run","title":"NotebookLM 실행·검증 기록","href":"downloads/neumann-2026/notebooklm-run.md","storage":"pages","size_bytes":7582,"sha256":"2dafda1fd43f0166e14538c4b0209d7228781c7063b0b914862a0273f43aca51","status":"complete","provenance":"researcher_generated"},
-        {"id":"neumann-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-Korean-deep-dive.m4a","storage":"release","size_bytes":42745397,"sha256":"fdbad4c5591780e14439783abfb3f077e798a8c2e76199bac04a9c675da3d8cb","status":"complete","provenance":"notebooklm_generated"},
-        {"id":"neumann-slides","type":"slides","title":"NotebookLM 세미나 PPT","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-NotebookLM-seminar-deck.pptx","storage":"release","size_bytes":13678611,"sha256":"6a3978e96874758f93c3e10d5b9b604eda07e11f4f4eb7b34bdd0eb7a992ac9c","status":"complete","provenance":"notebooklm_generated"},
-        {"id":"neumann-slide-pdf","type":"slide_pdf","title":"NotebookLM 세미나 슬라이드 PDF","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-NotebookLM-seminar-deck.pdf","storage":"release","size_bytes":12778964,"sha256":"2f198636107e1844f00207eabce53a45b15396651f50cfd091f75bd5aa2131cd","status":"complete","provenance":"notebooklm_generated"},
-        {"id":"neumann-infographic","type":"infographic","title":"정책-실무 간극 인포그래픽","href":"downloads/neumann-2026/infographic.png","storage":"pages","size_bytes":1951433,"sha256":"a6717dd56edc2e426592f144e35e10d5ed035dbe19a56cd2b51f5067fbf91f1e","status":"complete","provenance":"researcher_generated"}
-      ]
+        {
+          "id": "neumann-2026-source",
+          "type": "source_paper",
+          "title": "CC BY 4.0 원문 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Neumann-et-al-2026-Between-policy-and-practice.pdf",
+          "storage": "release",
+          "size_bytes": 1114801,
+          "sha256": "f7231dc9da282306676a901ebe88d9d05e953683f65b64e92a8e75c379ba4a1c",
+          "status": "complete",
+          "provenance": "publisher",
+          "access": "public"
+        },
+        {
+          "id": "neumann-2026-korean",
+          "type": "korean_version",
+          "title": "AI 보조 비공식 한국어 전문 번역",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Neumann-2026-Korean-unofficial-translation.pdf",
+          "storage": "release",
+          "size_bytes": 215599,
+          "sha256": "e24f5142b2a1a2a69679e7b345e259aea8b5822184108f45769948b50f5202d5",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public",
+          "translation_kind": "full_unofficial"
+        },
+        {
+          "id": "neumann-analysis",
+          "type": "analysis",
+          "title": "비판적 논문 분석 카드",
+          "href": "downloads/neumann-2026/analysis.md",
+          "storage": "pages",
+          "size_bytes": 15070,
+          "sha256": "689ef4a9fca789e422378bcd015e6f7555bf8cdc76ee6dfce18df0de3766016a",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-prompt",
+          "type": "notebooklm_prompt",
+          "title": "한국어 음성·PPT·검증용 NotebookLM 프롬프트",
+          "href": "downloads/neumann-2026/notebooklm-prompts.md",
+          "storage": "pages",
+          "size_bytes": 8003,
+          "sha256": "66e495c3ec940d56f8603ce7669744fc7707e09b75a4e435628f9026d3b46330",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-run",
+          "type": "notebooklm_run",
+          "title": "NotebookLM 실행·검증 기록",
+          "href": "downloads/neumann-2026/notebooklm-run.md",
+          "storage": "pages",
+          "size_bytes": 7582,
+          "sha256": "2dafda1fd43f0166e14538c4b0209d7228781c7063b0b914862a0273f43aca51",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-audio",
+          "type": "audio",
+          "title": "한국어 심층 분석 오디오",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-Korean-deep-dive.m4a",
+          "storage": "release",
+          "size_bytes": 42745397,
+          "sha256": "fdbad4c5591780e14439783abfb3f077e798a8c2e76199bac04a9c675da3d8cb",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-slides",
+          "type": "slides",
+          "title": "NotebookLM 세미나 PPT",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-NotebookLM-seminar-deck.pptx",
+          "storage": "release",
+          "size_bytes": 13678611,
+          "sha256": "6a3978e96874758f93c3e10d5b9b604eda07e11f4f4eb7b34bdd0eb7a992ac9c",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-slide-pdf",
+          "type": "slide_pdf",
+          "title": "NotebookLM 세미나 슬라이드 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/Neumann-2026-NotebookLM-seminar-deck.pdf",
+          "storage": "release",
+          "size_bytes": 12778964,
+          "sha256": "2f198636107e1844f00207eabce53a45b15396651f50cfd091f75bd5aa2131cd",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "neumann-infographic",
+          "type": "infographic",
+          "title": "정책-실무 간극 인포그래픽",
+          "href": "downloads/neumann-2026/infographic.png",
+          "storage": "pages",
+          "size_bytes": 1951433,
+          "sha256": "a6717dd56edc2e426592f144e35e10d5ed035dbe19a56cd2b51f5067fbf91f1e",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        }
+      ],
+      "rights": {
+        "license": "CC-BY-4.0",
+        "redistribution": "allowed",
+        "translation_publication": "allowed_with_attribution",
+        "source_url": "https://doi.org/10.1007/978-3-032-22375-3_18",
+        "checked_at": "2026-08-11"
+      }
     },
     {
       "slug": "golgeci-2025",
@@ -44,14 +262,123 @@
       "title": "Confronting and alleviating AI resistance in the workplace",
       "summary": "두려움·비효능감·반감과 AI 접근성·인간-AI 증강·정당화를 잇는 개념적 저항 과정 프레임워크.",
       "artifacts": [
-        {"id":"golgeci-analysis","type":"analysis","title":"AI 저항 과정 비판적 분석 카드","href":"downloads/golgeci-2025/analysis.md","storage":"pages","size_bytes":8886,"sha256":"94e9095ee10000ebbe9297d93ed5c940091322c71548404666bdb07fabbe1b5d","status":"complete","provenance":"researcher_generated"},
-        {"id":"golgeci-prompt","type":"notebooklm_prompt","title":"음성·PPT·인과검증용 NotebookLM 프롬프트","href":"downloads/golgeci-2025/notebooklm-prompts.md","storage":"pages","size_bytes":3307,"sha256":"f8658c84ee1156b1b8b4300c6d9fefd508d98efcc136ec53685c5282b8d6ff14","status":"complete","provenance":"researcher_generated"},
-        {"id":"golgeci-run","type":"notebooklm_run","title":"NotebookLM 단일 원문 실행 기록","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"golgeci-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"golgeci-slides","type":"slides","title":"박사 세미나 PPT","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"golgeci-slide-pdf","type":"slide_pdf","title":"세미나 슬라이드 PDF","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"golgeci-infographic","type":"infographic","title":"AI 저항 과정 인포그래픽","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"}
-      ]
+        {
+          "id": "golgeci-2025-source",
+          "type": "source_paper",
+          "title": "CC BY 4.0 원문 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Golgeci-et-al-2025-AI-resistance-process-framework.pdf",
+          "storage": "release",
+          "size_bytes": 669657,
+          "sha256": "2534a6efb7c4e63b034e181d72a0b4562ddda4583f7d1eb366d9cef92e481354",
+          "status": "complete",
+          "provenance": "publisher",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-2025-korean",
+          "type": "korean_version",
+          "title": "AI 보조 비공식 한국어 전문 번역",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Golgeci-2025-Korean-unofficial-translation.pdf",
+          "storage": "release",
+          "size_bytes": 312086,
+          "sha256": "2be7f8b8f084fe7368a582416ba8edfe6192a81786341f5857f3b985e276e43e",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public",
+          "translation_kind": "full_unofficial"
+        },
+        {
+          "id": "golgeci-analysis",
+          "type": "analysis",
+          "title": "AI 저항 과정 비판적 분석 카드",
+          "href": "downloads/golgeci-2025/analysis.md",
+          "storage": "pages",
+          "size_bytes": 8886,
+          "sha256": "94e9095ee10000ebbe9297d93ed5c940091322c71548404666bdb07fabbe1b5d",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-prompt",
+          "type": "notebooklm_prompt",
+          "title": "음성·PPT·인과검증용 NotebookLM 프롬프트",
+          "href": "downloads/golgeci-2025/notebooklm-prompts.md",
+          "storage": "pages",
+          "size_bytes": 3307,
+          "sha256": "f8658c84ee1156b1b8b4300c6d9fefd508d98efcc136ec53685c5282b8d6ff14",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-run",
+          "type": "notebooklm_run",
+          "title": "단일 원문 기반 NotebookLM 실행·검증 기록",
+          "href": "downloads/golgeci-2025/notebooklm-run.md",
+          "storage": "pages",
+          "size_bytes": 1718,
+          "sha256": "8c87ae12712a951c7e922c9460f0fe1e1092941f3aa24134603d955110b131c0",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-audio",
+          "type": "audio",
+          "title": "한국어 심층 분석 오디오 · 약 14분 12초",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Golgeci-2025-NotebookLM-audio-overview.m4a",
+          "storage": "release",
+          "size_bytes": 27407638,
+          "sha256": "0952b92a20b1f184ac3bea8101654d44cbf9441b1084cc3ddb9274f14feed714",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-slides",
+          "type": "slides",
+          "title": "편집 가능한 12장 NotebookLM 박사 세미나 PPT",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Golgeci-2025-NotebookLM-seminar-deck.pptx",
+          "storage": "release",
+          "size_bytes": 13674991,
+          "sha256": "6e445d67d02f640895366a0074434a85fdd37885130e692674664312e49f3f53",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-slide-pdf",
+          "type": "slide_pdf",
+          "title": "12쪽 NotebookLM 세미나 슬라이드 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Golgeci-2025-NotebookLM-seminar-deck.pdf",
+          "storage": "release",
+          "size_bytes": 11610088,
+          "sha256": "30c7ffb8230a7f41e5399bd6d524870f5f6b54f2dcb5be6e090e2b607ff42234",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-infographic",
+          "type": "infographic",
+          "title": "AI 저항 과정 인포그래픽",
+          "href": "downloads/golgeci-2025/infographic.png",
+          "storage": "pages",
+          "size_bytes": 4523233,
+          "sha256": "9eb39378e432c80607331a05048226e9c37ebc88e77642bbea84d5b7b8f9b749",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        }
+      ],
+      "rights": {
+        "license": "CC-BY-4.0",
+        "redistribution": "allowed",
+        "translation_publication": "allowed_with_attribution",
+        "source_url": "https://doi.org/10.1016/j.hrmr.2024.101075",
+        "checked_at": "2026-08-11"
+      }
     },
     {
       "slug": "battilana-casciaro-2012",
@@ -61,14 +388,141 @@
       "title": "Change Agents, Networks, and Institutions",
       "summary": "변화 괴리도에 따라 구조적 공백과 응집형 네트워크의 효과가 달라지는 변화주도자 네트워크 베이스 논문.",
       "artifacts": [
-        {"id":"bc2012-analysis","type":"analysis","title":"네트워크 조건부 이론 분석 카드","href":"downloads/battilana-casciaro-2012/analysis.md","storage":"pages","size_bytes":7493,"sha256":"d0ffe13dce0e294068f954da00880ebcfdb54e683d6bce3c1175314be73fb44c","status":"complete","provenance":"researcher_generated"},
-        {"id":"bc2012-prompt","type":"notebooklm_prompt","title":"음성·PPT·네트워크 시각화용 프롬프트","href":"downloads/battilana-casciaro-2012/notebooklm-prompts.md","storage":"pages","size_bytes":2985,"sha256":"74dca9e96d7fe72a54cc0127c10584135b861ec215ca660cb5730243fd00d2fa","status":"complete","provenance":"researcher_generated"},
-        {"id":"bc2012-run","type":"notebooklm_run","title":"NotebookLM 단일 원문 실행 기록","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2012-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2012-slides","type":"slides","title":"박사 세미나 PPT","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2012-slide-pdf","type":"slide_pdf","title":"세미나 슬라이드 PDF","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2012-infographic","type":"infographic","title":"네트워크-변화 괴리도 인포그래픽","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"}
-      ]
+        {
+          "id": "bc2012-source",
+          "type": "source_paper",
+          "title": "공식 원문 링크와 암호화 개인 열람본",
+          "href": "https://doi.org/10.5465/amj.2009.0891",
+          "storage": "external",
+          "size_bytes": 0,
+          "sha256": "",
+          "status": "complete",
+          "provenance": "publisher",
+          "access": "official_link_plus_password_encrypted",
+          "protected": {
+            "href": "protected/bc2012-source.enc",
+            "size_bytes": 329193,
+            "sha256": "1b7c1991373f6480d2004081174ff4eac4af4fd5d7ac3c3ec8bc5f799d11d53b",
+            "container_version": 1,
+            "algorithm": "AES-256-GCM",
+            "kdf": "PBKDF2-HMAC-SHA-256",
+            "iterations": 600000
+          }
+        },
+        {
+          "id": "bc2012-korean",
+          "type": "korean_version",
+          "title": "전문 번역이 아닌 한국어 학습가이드와 암호화 개인 번역본",
+          "href": "downloads/battilana-casciaro-2012/korean-study-guide.md",
+          "storage": "pages",
+          "size_bytes": 10530,
+          "sha256": "35c6b2562d9de461cf29155c764df29982554c3a5acc2c5034e6b8cca339d8e3",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public_plus_password_encrypted",
+          "translation_kind": "detailed_study_guide",
+          "protected": {
+            "href": "protected/bc2012-korean-full.enc",
+            "size_bytes": 340597,
+            "sha256": "e69cc39ea661bda0ebc8c4e65253cc42b6019997142a939bf8d5f0e3e511e185",
+            "container_version": 1,
+            "algorithm": "AES-256-GCM",
+            "kdf": "PBKDF2-HMAC-SHA-256",
+            "iterations": 600000
+          }
+        },
+        {
+          "id": "bc2012-analysis",
+          "type": "analysis",
+          "title": "네트워크 조건부 이론 분석 카드",
+          "href": "downloads/battilana-casciaro-2012/analysis.md",
+          "storage": "pages",
+          "size_bytes": 7493,
+          "sha256": "d0ffe13dce0e294068f954da00880ebcfdb54e683d6bce3c1175314be73fb44c",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-prompt",
+          "type": "notebooklm_prompt",
+          "title": "음성·PPT·네트워크 시각화용 프롬프트",
+          "href": "downloads/battilana-casciaro-2012/notebooklm-prompts.md",
+          "storage": "pages",
+          "size_bytes": 2985,
+          "sha256": "74dca9e96d7fe72a54cc0127c10584135b861ec215ca660cb5730243fd00d2fa",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-run",
+          "type": "notebooklm_run",
+          "title": "단일 원문 기반 NotebookLM 실행·검증 기록",
+          "href": "downloads/battilana-casciaro-2012/notebooklm-run.md",
+          "storage": "pages",
+          "size_bytes": 1851,
+          "sha256": "3a67cd6690500ca815b604cfd4542fe7d8a8a8d07c2d0c8fac87d5b1ee4c141b",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-audio",
+          "type": "audio",
+          "title": "한국어 심층 분석 오디오 · 약 19분 16초",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2012-NotebookLM-audio-overview.m4a",
+          "storage": "release",
+          "size_bytes": 37208529,
+          "sha256": "281e6b0cd85bf675ca07d2e77da3cc4e50e9b22ff453b4faa5d1295ba7c57360",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-slides",
+          "type": "slides",
+          "title": "편집 가능한 12장 NotebookLM 박사 세미나 PPT",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2012-NotebookLM-seminar-deck.pptx",
+          "storage": "release",
+          "size_bytes": 13981762,
+          "sha256": "a420144a568b7ee5129def8b45229cc3de262bfd246fb0ac6b0f1f41907c9e11",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-slide-pdf",
+          "type": "slide_pdf",
+          "title": "12쪽 NotebookLM 세미나 슬라이드 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2012-NotebookLM-seminar-deck.pdf",
+          "storage": "release",
+          "size_bytes": 1714312,
+          "sha256": "e22743a8f5aeb77d1e41c35b7826a9267986e2cc427c8f2bcd321e12bf6544ff",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2012-infographic",
+          "type": "infographic",
+          "title": "네트워크-변화 괴리도 인포그래픽",
+          "href": "downloads/battilana-casciaro-2012/infographic.png",
+          "storage": "pages",
+          "size_bytes": 4299982,
+          "sha256": "2f2ddfc4b642642bedc38d28c6be9fc68b4844eacaf711fee291f562e66dd3a9",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        }
+      ],
+      "rights": {
+        "license": "author-manuscript-policy",
+        "redistribution": "restricted",
+        "translation_publication": "restricted",
+        "source_url": "https://dash.harvard.edu/handle/1/9544459",
+        "checked_at": "2026-08-11"
+      }
     },
     {
       "slug": "battilana-casciaro-2013",
@@ -78,14 +532,141 @@
       "title": "Overcoming Resistance to Organizational Change",
       "summary": "지지자·경계인·저항자를 구분하고 강한 관계와 변화 괴리도의 조건부 효과를 보여 주는 관계 전략 베이스 논문.",
       "artifacts": [
-        {"id":"bc2013-analysis","type":"analysis","title":"저항 대상별 관계 전략 분석 카드","href":"downloads/battilana-casciaro-2013/analysis.md","storage":"pages","size_bytes":7543,"sha256":"23a5195de07892be3ea78dbbb81ee17be16c2a57e42070d7284fecb0afcf7b15","status":"complete","provenance":"researcher_generated"},
-        {"id":"bc2013-prompt","type":"notebooklm_prompt","title":"음성·PPT·전략 매트릭스용 프롬프트","href":"downloads/battilana-casciaro-2013/notebooklm-prompts.md","storage":"pages","size_bytes":3010,"sha256":"91dd6492a34cacb93a1b47b259b55ba2df22520794b71882dbba81181a6e2456","status":"complete","provenance":"researcher_generated"},
-        {"id":"bc2013-run","type":"notebooklm_run","title":"NotebookLM 단일 원문 실행 기록","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2013-audio","type":"audio","title":"한국어 심층 분석 오디오","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2013-slides","type":"slides","title":"박사 세미나 PPT","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2013-slide-pdf","type":"slide_pdf","title":"세미나 슬라이드 PDF","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"},
-        {"id":"bc2013-infographic","type":"infographic","title":"경계인·저항자 관계 전략 인포그래픽","href":"","storage":"none","size_bytes":0,"sha256":"","status":"missing","provenance":"planned"}
-      ]
+        {
+          "id": "bc2013-source",
+          "type": "source_paper",
+          "title": "공식 원문 링크와 암호화 개인 열람본",
+          "href": "https://doi.org/10.1287/mnsc.1120.1583",
+          "storage": "external",
+          "size_bytes": 0,
+          "sha256": "",
+          "status": "complete",
+          "provenance": "publisher",
+          "access": "official_link_plus_password_encrypted",
+          "protected": {
+            "href": "protected/bc2013-source.enc",
+            "size_bytes": 338313,
+            "sha256": "6ea06407140b956e2feadb9a3873c213b8ec201bccb383868bf8e71b3daf5f04",
+            "container_version": 1,
+            "algorithm": "AES-256-GCM",
+            "kdf": "PBKDF2-HMAC-SHA-256",
+            "iterations": 600000
+          }
+        },
+        {
+          "id": "bc2013-korean",
+          "type": "korean_version",
+          "title": "전문 번역이 아닌 한국어 학습가이드와 암호화 개인 번역본",
+          "href": "downloads/battilana-casciaro-2013/korean-study-guide.md",
+          "storage": "pages",
+          "size_bytes": 11674,
+          "sha256": "7e7ea441d56860631a6fec956776e5b793860a95d588e5c3adcf4e6a49e155bd",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public_plus_password_encrypted",
+          "translation_kind": "detailed_study_guide",
+          "protected": {
+            "href": "protected/bc2013-korean-full.enc",
+            "size_bytes": 358749,
+            "sha256": "726e9248a410a9edb9b652b2abc7fa1f0dac894795c06b57568a982c3c31c9db",
+            "container_version": 1,
+            "algorithm": "AES-256-GCM",
+            "kdf": "PBKDF2-HMAC-SHA-256",
+            "iterations": 600000
+          }
+        },
+        {
+          "id": "bc2013-analysis",
+          "type": "analysis",
+          "title": "저항 대상별 관계 전략 분석 카드",
+          "href": "downloads/battilana-casciaro-2013/analysis.md",
+          "storage": "pages",
+          "size_bytes": 7543,
+          "sha256": "23a5195de07892be3ea78dbbb81ee17be16c2a57e42070d7284fecb0afcf7b15",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-prompt",
+          "type": "notebooklm_prompt",
+          "title": "음성·PPT·전략 매트릭스용 프롬프트",
+          "href": "downloads/battilana-casciaro-2013/notebooklm-prompts.md",
+          "storage": "pages",
+          "size_bytes": 3010,
+          "sha256": "91dd6492a34cacb93a1b47b259b55ba2df22520794b71882dbba81181a6e2456",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-run",
+          "type": "notebooklm_run",
+          "title": "단일 원문 기반 NotebookLM 실행·검증 기록",
+          "href": "downloads/battilana-casciaro-2013/notebooklm-run.md",
+          "storage": "pages",
+          "size_bytes": 1816,
+          "sha256": "e6202aeb8758057b303e1a7074e6783233569c83c36a74a4d1dcdb7013d3b743",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-audio",
+          "type": "audio",
+          "title": "한국어 심층 분석 오디오 · 약 13분 50초",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2013-NotebookLM-audio-overview.m4a",
+          "storage": "release",
+          "size_bytes": 26710419,
+          "sha256": "044e194901814d1018ef56bba0bba6494e813acdef30b6d7539e0244521b229a",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-slides",
+          "type": "slides",
+          "title": "편집 가능한 12장 NotebookLM 박사 세미나 PPT",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2013-NotebookLM-seminar-deck.pptx",
+          "storage": "release",
+          "size_bytes": 15180093,
+          "sha256": "bfea4f00a855f0cd83cbf284a85fd3b3f4d35b3bf44b1e5ce50d923f902f65ff",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-slide-pdf",
+          "type": "slide_pdf",
+          "title": "12쪽 NotebookLM 세미나 슬라이드 PDF",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/Battilana-Casciaro-2013-NotebookLM-seminar-deck.pdf",
+          "storage": "release",
+          "size_bytes": 12871701,
+          "sha256": "0f5e456713a18a80015c1a7362689850e06b283306e15176c7f08b43457c740a",
+          "status": "complete",
+          "provenance": "notebooklm_generated",
+          "access": "public"
+        },
+        {
+          "id": "bc2013-infographic",
+          "type": "infographic",
+          "title": "경계인·저항자 관계 전략 인포그래픽",
+          "href": "downloads/battilana-casciaro-2013/infographic.png",
+          "storage": "pages",
+          "size_bytes": 1405978,
+          "sha256": "e7b5f91288fad4eb67ec4759bc4d66311ecd9277167acc8efdbb92d7a0993cf5",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        }
+      ],
+      "rights": {
+        "license": "all-rights-reserved",
+        "redistribution": "restricted",
+        "translation_publication": "restricted",
+        "source_url": "https://pubsonline.informs.org/authorportal/rights-permissions",
+        "checked_at": "2026-08-11"
+      }
     },
     {
       "slug": "research-design",
@@ -95,10 +676,50 @@
       "title": "연구 종합과 설계",
       "summary": "개별 논문을 현상·AI 저항·네트워크 구조·관계 전략으로 연결하고 연구모형·인터뷰 설계로 전환하는 프로젝트 단위 산출물.",
       "artifacts": [
-        {"id":"four-paper-bridge","type":"research_synthesis","title":"네 논문 이론 연결: 현상에서 저항 관리 네트워크로","href":"downloads/research-design/four-paper-theory-bridge.md","storage":"pages","size_bytes":3788,"sha256":"38668dba537dd39a6aaed582f9f35b54edb0f620fbf4b6d2ff25158a44c11142","status":"complete","provenance":"researcher_generated"},
-        {"id":"literature-map","type":"research_design","title":"AI 전환 변화주도자 문헌지도","href":"downloads/research-design/literature-map.md","storage":"pages","size_bytes":11747,"sha256":"7b70d915ee23059a6efe46737d15a64f96e1ae112aa5932c8d6bec13e097cb79","status":"complete","provenance":"researcher_generated"},
-        {"id":"core-matrix","type":"research_design","title":"핵심 논문 매트릭스·연구모형·인터뷰 가이드","href":"downloads/research-design/core-paper-matrix-research-model-interview-guide.md","storage":"pages","size_bytes":14774,"sha256":"8c7a8bbfce1a95e1c8833f1d93f45e374042a742824458357da58f5a0512a807","status":"complete","provenance":"researcher_generated"},
-        {"id":"literature-map-xlsx","type":"spreadsheet","title":"문헌지도·평가표·연구모형 분석 워크북","href":"https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/AI-transformation-change-agent-literature-map-2026-08-10.xlsx","storage":"release","size_bytes":47973,"sha256":"e1ff9d0132c1d450c3c5f44db67c6e672c1e51fb13847b4fe12adfb6280ee3ec","status":"complete","provenance":"researcher_generated"}
+        {
+          "id": "four-paper-bridge",
+          "type": "research_synthesis",
+          "title": "네 논문 이론 연결: 현상에서 저항 관리 네트워크로",
+          "href": "downloads/research-design/four-paper-theory-bridge.md",
+          "storage": "pages",
+          "size_bytes": 3788,
+          "sha256": "38668dba537dd39a6aaed582f9f35b54edb0f620fbf4b6d2ff25158a44c11142",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "literature-map",
+          "type": "research_design",
+          "title": "AI 전환 변화주도자 문헌지도",
+          "href": "downloads/research-design/literature-map.md",
+          "storage": "pages",
+          "size_bytes": 11747,
+          "sha256": "7b70d915ee23059a6efe46737d15a64f96e1ae112aa5932c8d6bec13e097cb79",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "core-matrix",
+          "type": "research_design",
+          "title": "핵심 논문 매트릭스·연구모형·인터뷰 가이드",
+          "href": "downloads/research-design/core-paper-matrix-research-model-interview-guide.md",
+          "storage": "pages",
+          "size_bytes": 14774,
+          "sha256": "8c7a8bbfce1a95e1c8833f1d93f45e374042a742824458357da58f5a0512a807",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "literature-map-xlsx",
+          "type": "spreadsheet",
+          "title": "문헌지도·평가표·연구모형 분석 워크북",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/AI-transformation-change-agent-literature-map-2026-08-10.xlsx",
+          "storage": "release",
+          "size_bytes": 47973,
+          "sha256": "e1ff9d0132c1d450c3c5f44db67c6e672c1e51fb13847b4fe12adfb6280ee3ec",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        }
       ]
     }
   ]
