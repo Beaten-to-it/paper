@@ -82,11 +82,14 @@ RELEASE_EXTENSIONS = {
 PUBLIC_SITE_FILES = {
     ".nojekyll",
     "assets/app.js",
+    "assets/protected-crypto.js",
+    "assets/protected-viewer.js",
     "assets/styles.css",
     "assets/viewer.js",
     "data/catalog.json",
     "favicon.svg",
     "index.html",
+    "protected-viewer.html",
     "viewer.html",
 }
 

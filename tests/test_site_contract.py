@@ -61,6 +61,33 @@ class SiteContractTests(unittest.TestCase):
             public_text = run_log.read_text(encoding="utf-8")
             self.assertNotIn("notebook.google.com/notebook/", public_text, run_log)
 
+    def test_protected_viewer_uses_a_memory_only_password_boundary(self):
+        viewer = SITE_ROOT / "protected-viewer.html"
+        viewer_script = SITE_ROOT / "assets" / "protected-viewer.js"
+        crypto_script = SITE_ROOT / "assets" / "protected-crypto.js"
+        self.assertTrue(viewer.is_file(), "site/protected-viewer.html must exist")
+        self.assertTrue(viewer_script.is_file(), "site/assets/protected-viewer.js must exist")
+        self.assertTrue(crypto_script.is_file(), "site/assets/protected-crypto.js must exist")
+
+        html = viewer.read_text(encoding="utf-8")
+        script = viewer_script.read_text(encoding="utf-8")
+        self.assertIn('type="password"', html)
+        self.assertIn('autocomplete="off"', html)
+        self.assertIn('http-equiv="Content-Security-Policy"', html)
+        self.assertIn('type="module"', html)
+        self.assertIn('fetch("data/catalog.json", {cache: "no-store"})', script)
+        self.assertIn('cache: "no-store"', script)
+        self.assertIn("URL.createObjectURL", script)
+        self.assertIn("URL.revokeObjectURL", script)
+        self.assertNotIn("localStorage", script)
+        self.assertNotIn("sessionStorage", script)
+        self.assertNotIn("document.cookie", script)
+
+    def test_protected_viewer_declares_the_client_side_security_limit(self):
+        html = (SITE_ROOT / "protected-viewer.html").read_text(encoding="utf-8")
+        self.assertIn("오프라인 대입 공격", html)
+        self.assertIn("서버 인증", html)
+
 
 if __name__ == "__main__":
     unittest.main()
