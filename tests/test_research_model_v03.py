@@ -55,6 +55,50 @@ SPEC_TIE_PROTOCOL = "각 사건의 관계는 `발신자 코드 → 수신자 코
 GUIDE_TIE_PROTOCOL = "각 표시된 관계는 초점 사건의 `발신자 코드 → 수신자 코드` 유향 기록이다. 관계마다 (a) `발신자 보고 전달`(발신자가 명명된 수신자에게 신호를 보냈다고 진술한 사실), (b) `수신·확인 근거`(명명된 수신자의 진술·문서·확인 기록), (c) `수신 뒤 수신자 태도`(수신 뒤 수용·보류·거절·회피 중 확인된 반응)를 같은 순서로 기록한다. 발신자 보고만으로는 수신을 확정하지 않는다."
 DELIVERY_LEDGER_DISPOSITION = "| 전달·수신·수신자 태도 경계 | 수용·수정 | §6.2와 Q3이 사건별 유향 연결, 발신자 보고 전달, 명명된 수신자의 수신·확인 근거, 수신 뒤 수신자 태도를 분리하고 발신자 보고만으로 수신을 확정하지 못하게 한다. |"
 
+CARD_H2_CONTRACT = (
+    ("직접 근거", "**논문 직접 근거**"),
+    ("v0.3에서의 역할", "**통합 해석**"),
+    ("연결되는 명제", "**후속 연구 명제 (검증 전)**"),
+    ("검증하지 않은 것", "**논문 직접 근거의 한계**"),
+    ("현장자료 요구", "**후속 연구를 위한 자료 요구**"),
+)
+
+CARD_COMMON_BOUNDARIES = (
+    "P1-P7은 모두 검증 전 후속 연구 명제다.",
+    "이 카드는 현장조사 시작이나 실증 검증을 뜻하지 않으며",
+    "NotebookLM 산출물은 근거로 사용하지 않는다.",
+)
+
+CARD_V03_REQUIREMENTS = {
+    "kemell-2025": (
+        ("v0.3에서의 역할", "공식 AI 도입과 비공식 실험이 함께 존재하는 SW 조직의 사건 맥락을 제공한다."),
+        ("연결되는 명제", "P1-P5를 검토할 때, 공식 도입과 현장 실험이 공존하는 AI 사건을 표집할 이유를 제공한다."),
+        ("검증하지 않은 것", "공식 리더와 비공식 AI 챔피언의 역할 분담이나 두 주체의 네트워크 연결을 측정하지 않았다."),
+        ("검증하지 않은 것", "저항 관리의 효과, 책임 있는 AI 채택, 정책-실무 정합성을 인과적으로 검증하지 않았다."),
+    ),
+    "neumann-2026": (
+        ("v0.3에서의 역할", "v0.3의 **정책-실무 간극과 Shadow AI 신호**를 보여 주는 현상 앵커다."),
+        ("연결되는 명제", "P4의 은폐·이탈 경로와 P5의 정책-실무 정합성 맥락을 구체화한다."),
+        ("검증하지 않은 것", "리더·보안·법무·챔피언이 누구와 어떻게 연결되어 정책을 번역하거나 우회를 표면화하는지 측정하지 않았다."),
+    ),
+    "golgeci-2025": (
+        ("v0.3에서의 역할", "v0.3의 **개념적 AI 저항과 완화 메커니즘**을 제공한다."),
+        ("연결되는 명제", "P1-P5의 구성원 반응과 발언 안전성·발언 효능감의 과정 해석에 기여한다."),
+        ("검증하지 않은 것", "개념 논문이므로 과정의 실제 순서와 효과를 실증 검증하지 않았다."),
+        ("검증하지 않은 것", "AI 저항의 경험적 척도 타당화 연구가 아니다."),
+    ),
+    "battilana-casciaro-2012": (
+        ("v0.3에서의 역할", "v0.3의 **변화 발산성에 따른 네트워크 구조 조건**을 제공한다."),
+        ("연결되는 명제", "P6의 조건부 논리, 즉 고발산 사건의 중개 연결과 저발산 사건의 팀 내부 응집·강한 관계를 탐색할 이론적 출발점이다."),
+        ("검증하지 않은 것", "NHS 결과를 SW·AI 조직에 직접 일반화할 수 없다."),
+    ),
+    "battilana-casciaro-2013": (
+        ("v0.3에서의 역할", "v0.3의 **수신자 태도와 관계강도 경계**를 제공한다."),
+        ("연결되는 명제", "P7의 관계 기반 설득 경계조건을 검토하는 이론적 출발점이다."),
+        ("직접 근거", "고괴리 조건의 부정적 단순기울기는 모형에 따라 한계적 유의성을 포함해 과장할 수 없다."),
+    ),
+}
+
 
 def section(text, heading):
     start = text.index(heading)
@@ -63,6 +107,14 @@ def section(text, heading):
     following = re.search(rf"^#{{1,{level}}}\s", text[body_start:], re.MULTILINE)
     end = body_start + following.start() if following else len(text)
     return text[body_start:end]
+
+
+def h2_sections(text):
+    matches = list(re.finditer(r"^## ([^\n]+)$", text, re.MULTILINE))
+    return tuple(
+        (match.group(1), text[match.end():matches[index + 1].start() if index + 1 < len(matches) else len(text)])
+        for index, match in enumerate(matches)
+    )
 
 
 class ResearchModelV03Tests(unittest.TestCase):
@@ -92,6 +144,20 @@ class ResearchModelV03Tests(unittest.TestCase):
             "alter-alter 관계는 초점 사건에서 핵심 인물 최대 5명 사이에서만 묻고, 무방향 쌍 최대 10개로 제한한다.",
         ):
             self.assert_once(name_generator_section, clause)
+
+    def assert_v03_card_contract(self, slug, text):
+        sections = h2_sections(text)
+        headings = tuple(heading for heading, _ in sections)
+        expected_headings = tuple(heading for heading, _ in CARD_H2_CONTRACT)
+        self.assertEqual(headings, expected_headings, slug)
+        by_heading = dict(sections)
+
+        for heading, label in CARD_H2_CONTRACT:
+            self.assertIn(label, by_heading[heading], f"{slug}: missing {label} in {heading}")
+        for boundary in CARD_COMMON_BOUNDARIES:
+            self.assertIn(boundary, text, f"{slug}: missing common boundary")
+        for heading, clause in CARD_V03_REQUIREMENTS[slug]:
+            self.assertIn(clause, by_heading[heading], f"{slug}: missing role contract in {heading}")
 
     def test_level_contract_is_complete_and_rejects_a_missing_row(self):
         level_section = section(SPEC, "## 4. 분석단위와 다수준 구조")
@@ -149,13 +215,29 @@ class ResearchModelV03Tests(unittest.TestCase):
 
     def test_every_paper_has_one_v03_contribution_card(self):
         slugs = ["kemell-2025", "neumann-2026", "golgeci-2025", "battilana-casciaro-2012", "battilana-casciaro-2013"]
-        required = ["## 직접 근거", "## v0.3에서의 역할", "## 연결되는 명제", "## 검증하지 않은 것", "## 현장자료 요구"]
         for slug in slugs:
             path = ROOT / "site/downloads" / slug / "model-v0.3-contribution.md"
             self.assertTrue(path.is_file(), slug)
             text = path.read_text(encoding="utf-8")
-            self.assertTrue(all(heading in text for heading in required), slug)
-            self.assertIn("후속 연구 명제", text)
+            self.assert_v03_card_contract(slug, text)
+
+    def test_v03_card_contract_rejects_a_downgraded_h2(self):
+        path = ROOT / "site/downloads/kemell-2025/model-v0.3-contribution.md"
+        mutated = path.read_text(encoding="utf-8").replace("## v0.3에서의 역할", "> ## v0.3에서의 역할", 1)
+
+        with self.assertRaises(AssertionError):
+            self.assert_v03_card_contract("kemell-2025", mutated)
+
+    def test_v03_card_contract_rejects_a_missing_integrated_interpretation_label(self):
+        path = ROOT / "site/downloads/kemell-2025/model-v0.3-contribution.md"
+        mutated = path.read_text(encoding="utf-8").replace(
+            "## v0.3에서의 역할\n\n**통합 해석**",
+            "## v0.3에서의 역할",
+            1,
+        )
+
+        with self.assertRaises(AssertionError):
+            self.assert_v03_card_contract("kemell-2025", mutated)
 
     def test_epistemic_and_no_fieldwork_boundaries_reject_a_proposition_mutation(self):
         theory_section = section(SPEC, "## 3. 이론적 위치와 근거 경계")
