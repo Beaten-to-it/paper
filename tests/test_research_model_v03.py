@@ -208,13 +208,72 @@ DIVERGENCE_DECISION_CONTRACT = {
     "판정 유보": "교차확인된 차원이 세 개 미만이거나 핵심 자료가 충돌하면 판정을 유보하고 P6/P7 비교에 넣지 않는다.",
 }
 
+DIVERGENCE_USE_CONTRACT = {
+    "고발산 후보": "P6의 경계 연결 조건과 P7의 고발산 입력 조건을 평가한다.",
+    "저발산 후보": "P6의 내부 응집·강한 관계 조건을 평가하고 P7은 입력 불충족으로 기록한다.",
+    "혼합": "P6는 차원별로 분기해 비교하고 P7은 고발산 입력이 별도 확인될 때만 평가한다.",
+    "판정 유보": "P6/P7 판정을 모두 유보하고 추가 자료 또는 연구 2의 측정 정제를 기다린다.",
+}
+
+P6_NETWORK_CONTRACT = {
+    "NC-B": (
+        "경계 연결",
+        "기능·부서 경계를 넘는 유향 관계에서 전달과 수신이 확인되고 EV6 검토·조정 전에 활성화됐다.",
+        "관계 유형, 발신·수신 근거, 양쪽 기능·부서와 활성화 시점을 기록한다.",
+    ),
+    "NC-I": (
+        "내부 응집·강한 관계 후보",
+        "같은 팀의 핵심 인물 사이에서 상호 이름지목 또는 양측 수신 확인이 있고 반복 접촉이나 높은 지각 신뢰가 교차확인됐다.",
+        "파일럿의 제한 명부를 팀 전체 응집성 점수로 간주하지 않고 사건 맥락 후보로 기록한다.",
+    ),
+}
+
+P7_OUTCOME_CONTRACT = {
+    "RP": (
+        "관계압력",
+        "기존 관계 때문에 동의·수용해야 한다는 의무감, 죄책감 또는 회피가 반복 설득 뒤 보고됐다.",
+        "저항자 당사자 진술과 설득자 또는 독립 관찰자 진술을 교차확인한다.",
+    ),
+    "RD": (
+        "관계 손상",
+        "반복 설득 뒤 신뢰, 접촉 또는 협업이 사건 전보다 악화됐다.",
+        "관계 양측 진술이나 승인 범위 안의 비식별 협업·접촉 근거를 교차확인한다.",
+    ),
+    "CE": (
+        "챔피언 소진",
+        "반복 설득 뒤 챔피언이 정서적 고갈, 역할 과부하 또는 활동 축소를 보고했다.",
+        "챔피언 진술과 업무부담·활동 변화 자료를 연결하되 임상 진단으로 해석하지 않는다.",
+    ),
+}
+
+P6_P7_DECISION_CONTRACT = {
+    "P6": {
+        "입력 조건": "EV2-D의 발산성 후보, EV3의 경계 연결 또는 내부 응집·강한 관계 후보, EV6-EV7의 조정 경로·후행 결과를 함께 본다.",
+        "시간 순서": "EV2-D 사건 특성 → EV3 관계 활성화 → EV4-EV6 반응·경로 → EV7 실제 조정 결과 순서를 요구한다.",
+        "필요한 교차자료": "발산성 교차확인 자료, 전달·수신이 확인된 유향 관계, 기능·부서 경계 또는 팀 내부 관계 속성, 조정 결과의 복수 진술·승인 문서를 연결한다.",
+        "지지 후보": "고발산 후보에서 경계 연결이 먼저 활성화되어 조정으로 이어지거나, 저발산 후보에서 내부 응집·강한 관계가 먼저 활성화되어 조정으로 이어지는 대비가 확인된다.",
+        "반증 후보": "충분한 자료에서 위 조합이 반복적으로 뒤집히거나 관계 조건과 조정 결과 사이에 시간적 연결이 없다.",
+        "자료 부족·충돌": "발산성 판정 유보, 관계 전달·수신 미확인, 관계 유형 또는 결과의 자료 충돌이 있으면 P6 판정을 유보하고 평균·다수결로 해소하지 않는다.",
+        "연구 1 명제 처분": "두 분기가 모두 반복되면 유지 후보, 한 분기만 확인되면 분기·수정 후보, 반전이 반복되면 기각 후보로 기록한다. 단일 사건은 명제를 유지하지 못한다.",
+    },
+    "P7": {
+        "입력 조건": "EV2-D 고발산 후보, 설득 전 명확한 저항자 태도, EV3 이후 두 차례 이상의 관계 기반 설득, 그 뒤 관계압력·관계 손상·챔피언 소진을 함께 본다.",
+        "시간 순서": "고발산 판정 → 설득 전 저항자 태도 → 반복 설득 → 과정결과 순서를 요구하며 사후 태도로 초기 저항을 소급하지 않는다.",
+        "필요한 교차자료": "저항자 당사자 진술, 설득자·챔피언 진술, 반복 접촉 기록, 관계 양측 또는 독립 관찰자의 관계 변화 근거, 소진의 업무부담 자료를 연결한다.",
+        "지지 후보": "교차확인된 고발산 사건에서 명확한 저항자에게 두 차례 이상 관계 기반 설득한 뒤 관계압력·손상 또는 챔피언 소진이 나타난다.",
+        "반증 후보": "같은 입력과 순서에서 관계·자율성이 유지된 채 조정되거나, 결과가 반복 설득보다 먼저 발생하거나 저발산 사건에서만 반복된다.",
+        "자료 부족·충돌": "초기 태도, 반복 횟수, 관계 결과의 시간 순서 또는 독립 자료가 부족·충돌하면 P7 판정을 유보하며 수신자 회피만으로 소진을 추정하지 않는다.",
+        "연구 1 명제 처분": "결과가 반복되면 유지 후보, 압력·손상·소진 중 일부만 반복되면 분기·수정 후보, 충분한 반증이 반복되면 기각 후보로 기록한다. 단일 사건은 명제를 유지하지 못한다.",
+    },
+}
+
 ETHICS_STAGE_CONTRACT = (
     ("D0", ("지도교수", "근거상태")),
     ("G0", ("연구동의서", "철회", "익명화·연결코드", "사건·관계망 코딩북", "중단·보고")),
     ("G1", ("IRB", "기업 보안·법무·데이터 보호", "자료접근 협약", "서면 승인")),
     ("H1", ("G0와 G1", "독립 모집 담당자", "모집·접촉")),
-    ("H2", ("인지면접", "각 1명씩 총 3명", "승인 범위")),
-    ("H3", ("파일럿", "인지면접", "승인된 프로토콜")),
+    ("H2", ("G0·G1 승인", "H1 동의 회수", "인지면접", "각 1명씩 총 3명")),
+    ("H3", ("G0·G1 승인", "H1 동의 회수", "파일럿", "필요한 재승인", "승인된 프로토콜")),
     ("A0", ("순차 혼합방법", "다중 사례연구", "사회연결망 분석")),
 )
 
@@ -375,6 +434,7 @@ class ResearchModelV03Tests(unittest.TestCase):
         for row in decision_rows:
             self.assertEqual(len(row), 3)
             self.assertEqual(row[1], DIVERGENCE_DECISION_CONTRACT[row[0]])
+            self.assertEqual(row[2], DIVERGENCE_USE_CONTRACT[row[0]])
 
         for clause in (
             "각 차원은 `유지`, `국소 조정`, `경계 재구성`, `자료 부족`, `자료 충돌` 중 하나로 사건별 판정한다.",
@@ -389,6 +449,33 @@ class ResearchModelV03Tests(unittest.TestCase):
         self.assertEqual(len(divergence_event), 1)
         self.assertIn("DV1-DV4", divergence_event[0][1])
         self.assertIn("관계 동원 전", divergence_event[0][2])
+
+        network_rows = markdown_table_rows(markdown_section(protocol, "P6 네트워크 조건"))
+        self.assertEqual(network_rows[0], ("코드", "조건", "판정 규칙", "기록 경계"))
+        self.assertEqual({row[0] for row in network_rows[1:]}, set(P6_NETWORK_CONTRACT))
+        for row in network_rows[1:]:
+            self.assertEqual(tuple(row[1:]), P6_NETWORK_CONTRACT[row[0]])
+
+        outcome_rows = markdown_table_rows(markdown_section(protocol, "P7 과정결과"))
+        self.assertEqual(outcome_rows[0], ("코드", "결과", "판정 규칙", "필요한 교차자료"))
+        self.assertEqual({row[0] for row in outcome_rows[1:]}, set(P7_OUTCOME_CONTRACT))
+        for row in outcome_rows[1:]:
+            self.assertEqual(tuple(row[1:]), P7_OUTCOME_CONTRACT[row[0]])
+
+        for proposition, contract in P6_P7_DECISION_CONTRACT.items():
+            proposition_rows = markdown_table_rows(
+                markdown_section(protocol, f"{proposition} 사건 판정")
+            )
+            self.assertEqual(proposition_rows[0], ("판정 항목", "사건 수준 규칙"))
+            actual = {row[0]: row[1] for row in proposition_rows[1:] if len(row) == 2}
+            self.assertEqual(actual, contract, f"{proposition}: incomplete decision path")
+
+        p7_section = markdown_section(protocol, "P7 사건 판정")
+        for clause in (
+            "명확한 저항자 태도는 첫 관계 기반 설득 전에 당사자가 명시한 반대·거절·보류로 코딩하며, 설득 뒤 태도로 소급하지 않는다.",
+            "반복 관계 설득은 서로 다른 시점의 두 차례 이상 접촉으로 코딩하며 한 대화 안의 반복 표현은 한 차례로 센다.",
+        ):
+            self.assert_once(p7_section, clause)
 
     def assert_ethics_stage_ordering(self, matrix):
         next_steps = markdown_section(matrix, "13. 바로 다음 작업")
@@ -411,6 +498,27 @@ class ResearchModelV03Tests(unittest.TestCase):
         for human_stage in ("H1", "H2", "H3"):
             self.assertLess(stages.index("G0"), stages.index(human_stage))
             self.assertLess(stages.index("G1"), stages.index(human_stage))
+
+        violation_markers = (
+            "동의 회수 전",
+            "동의 전",
+            "동의 없이",
+            "승인 전",
+            "승인 없이",
+            "재승인 전",
+            "재승인 없이",
+        )
+        human_actions = ("모집", "접촉", "인지면접", "파일럿")
+        safe_prohibitions = ("하지 않는다", "시작하지 않는다", "금지", "중단", "허용하지 않는다")
+        for line in next_steps.splitlines():
+            if not any(marker in line for marker in violation_markers):
+                continue
+            if not any(action in line for action in human_actions):
+                continue
+            self.assertTrue(
+                any(prohibition in line for prohibition in safe_prohibitions),
+                f"pre-gate human-subject instruction: {line}",
+            )
 
         sampling = section(matrix, "### 4.2 예비 표집")
         self.assertIn("G0 프로토콜 확정과 G1 서면 승인이 끝나기 전에는 후보 팀이나 개인을 모집·접촉하지 않는다.", sampling)
@@ -654,6 +762,28 @@ class ResearchModelV03Tests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.assert_divergence_measurement_contract(weakened_decision)
 
+        deleted_use_path = protocol
+        for original in DIVERGENCE_USE_CONTRACT.values():
+            deleted_use_path = deleted_use_path.replace(original, "P6/P7 사용 경로 삭제")
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(deleted_use_path)
+
+        p6_support = P6_P7_DECISION_CONTRACT["P6"]["지지 후보"]
+        p7_support = P6_P7_DECISION_CONTRACT["P7"]["지지 후보"]
+        exchanged = protocol.replace(p6_support, "__P6_SUPPORT__", 1)
+        exchanged = exchanged.replace(p7_support, p6_support, 1)
+        exchanged = exchanged.replace("__P6_SUPPORT__", p7_support, 1)
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(exchanged)
+
+        reversed_outcome = protocol.replace(
+            "경계 연결이 먼저 활성화되어 조정으로 이어지거나",
+            "경계 연결이 먼저 활성화되어 조정에 실패하거나",
+            1,
+        )
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(reversed_outcome)
+
     def test_matrix_requires_ethics_gates_before_any_human_contact(self):
         self.assert_ethics_stage_ordering(MATRIX)
 
@@ -665,3 +795,19 @@ class ResearchModelV03Tests(unittest.TestCase):
         mutated = MATRIX.replace(next_steps, "\n".join(lines), 1)
         with self.assertRaises(AssertionError):
             self.assert_ethics_stage_ordering(mutated)
+
+        preconsent_interview = MATRIX.replace(
+            "각 1명씩 총 3명에게 인지면접을 하고",
+            "각 1명씩 총 3명에게 동의 회수 전에 인지면접을 하고",
+            1,
+        )
+        with self.assertRaises(AssertionError):
+            self.assert_ethics_stage_ordering(preconsent_interview)
+
+        for contradiction in (
+            "승인 전에 후보자를 모집·접촉한다.",
+            "재승인 전에 파일럿을 진행한다.",
+        ):
+            contradicted = MATRIX.replace(next_steps, next_steps + "\n" + contradiction, 1)
+            with self.assertRaises(AssertionError):
+                self.assert_ethics_stage_ordering(contradicted)
