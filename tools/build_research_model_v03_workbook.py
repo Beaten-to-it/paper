@@ -1,5 +1,8 @@
 import argparse
+import copy
+import os
 import re
+import zipfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -19,14 +22,18 @@ ALT_FILL = "FFEAF2F8"
 HEADER_FONT = Font(name=FONT_NAME, size=10, bold=True, color="FFFFFFFF")
 BODY_FONT = Font(name=FONT_NAME, size=10, color="FF1F2937")
 LINK_FONT = Font(name=FONT_NAME, size=10, color="FF0563C1", underline="single")
-HEADER_BORDER = Border(bottom=Side(style="medium", color="FF8EA9C1"))
+HEADER_BORDER = Border(
+    right=Side(style="thin", color="FFFFFFFF"),
+    bottom=Side(style="medium", color="FF8EA9C1"),
+)
 BODY_BORDER = Border(bottom=Side(style="thin", color="FFD9E2F3"))
 PUBLIC_SITE_BASE = "https://beaten-to-it.github.io/paper/"
-DENSE_PRINT_SHEETS = {"구성개념", "명제추적", "논문별기여", "관계망"}
+DENSE_PRINT_SHEETS = {"구성개념", "명제추적", "논문별기여", "사건코딩", "관계망"}
 PRINT_TITLE_COLUMNS = {
     "구성개념": "A:A",
     "명제추적": "A:A",
     "논문별기여": "A:A",
+    "사건코딩": "A:A",
     "관계망": "A:D",
 }
 
@@ -45,6 +52,24 @@ EVENT_COLUMNS = (
     "problem_resolution",
     "rival_explanation",
     "negative_case",
+    "dv1_decision",
+    "dv1_primary_source",
+    "dv1_corroboration",
+    "dv2_decision",
+    "dv2_primary_source",
+    "dv2_corroboration",
+    "dv3_decision",
+    "dv3_primary_source",
+    "dv3_corroboration",
+    "dv4_decision",
+    "dv4_primary_source",
+    "dv4_corroboration",
+    "divergence_vector",
+    "divergence_event_decision",
+    "divergence_aggregation",
+    "divergence_uncertainty",
+    "p6_use_decision",
+    "p7_use_decision",
 )
 RELATION_TYPES = ("advice", "trust", "approval_exception", "risk_escalation")
 RELATION_EVIDENCE_SUFFIXES = (
@@ -65,6 +90,22 @@ RELATION_COLUMNS = (
         for relation in RELATION_TYPES
         for suffix in RELATION_EVIDENCE_SUFFIXES
     ),
+)
+ETHICS_SAFEGUARD_CONTRACT = (
+    ("ETH01", "사용 전 gate", ("인터뷰와 관계망 조사 전에", "IRB", "기업 보안·법무 승인")),
+    ("ETH02", "사용 전 gate", ("승인 전에는 파일럿 대상자에게 접촉하지 않고", "비승인 도구 사용기록")),
+    ("ETH03", "사용 전 gate", ("승인 후에도", "규정위반 적발", "인사평가", "성과 감시")),
+    ("ETH04", "연결코드와 내부자 safeguards", ("비응답 지명자", "역할 범주", "사건에만 귀속")),
+    ("ETH05", "연결코드와 내부자 safeguards", ("연결코드 명부", "분리 암호화", "분석 종료 시 폐기")),
+    ("ETH06", "연결코드와 내부자 safeguards", ("재직·협력 관계", "위치성·이해상충")),
+    ("ETH07", "연결코드와 내부자 safeguards", ("지휘·평가 관계가 없는", "독립 모집 담당자")),
+    ("ETH08", "연결코드와 내부자 safeguards", ("고용주에게 원자료를 제공하지 않는다", "동의서에 사전 명시")),
+    ("ETH09", "연결코드와 내부자 safeguards", ("작은 팀의 관계망", "최소 셀 기준", "원응답을 열람하지 못한다")),
+    ("ETH10", "중단 조건", ("IRB 또는 기업 보안·법무 승인 범위", "자료 수집을 중단")),
+    ("ETH11", "중단 조건", ("평가·보복·재식별 위험", "질문을 즉시 건너뛰고", "철회")),
+    ("ETH12", "중단 조건", ("실명, 고객명, 소스코드", "기록을 중지", "비식별 절차")),
+    ("ETH13", "중단 조건", ("독립 모집, 원자료 비공유, 분리 보관", "자료 수집을 중단")),
+    ("ETH14", "중단 조건", ("60분 예산", "관계 쌍을 늘리지 않고", "파일럿 부정 사례")),
 )
 
 
@@ -221,20 +262,55 @@ def _contribution_rows() -> list[list[object]]:
     return rows
 
 
-def _ethics_rows() -> list[list[object]]:
+def _section_items(text: str, heading: str) -> list[str]:
+    items = []
+    paragraph = []
+    in_fence = False
+
+    def flush_paragraph() -> None:
+        if paragraph:
+            text = _plain(" ".join(paragraph))
+            items.append(text)
+            items.extend(part for part in re.split(r"(?<=다\.)\s+", text) if part != text)
+            paragraph.clear()
+
+    for raw_line in _section(text, heading).splitlines():
+        line = raw_line.strip()
+        if line.startswith("```"):
+            flush_paragraph()
+            in_fence = not in_fence
+        elif in_fence or line.startswith(("#", "|")):
+            flush_paragraph()
+        elif not line:
+            flush_paragraph()
+        elif line.startswith(("- ", "* ")):
+            flush_paragraph()
+            items.append(_plain(line[2:]))
+        else:
+            paragraph.append(line)
+    flush_paragraph()
+    return items
+
+
+def _ethics_rows(text: str | None = None) -> list[list[object]]:
     target = _public_link("downloads/research-design/pilot-protocol-and-codingbook-v0.3.md")
-    text = _read(DESIGN_DIR / "pilot-protocol-and-codingbook-v0.3.md")
-    safeguards = []
-    for heading in ("사용 전 gate", "연결코드와 내부자 safeguards"):
-        for line in _section(text, heading).splitlines():
-            line = line.strip()
-            if line and not line.startswith(("#", "**", "- ", "|", "```")):
-                safeguards.append(_plain(line))
-    safeguards.extend(_plain(line[2:]) for line in _section(text, "중단 조건").splitlines() if line.strip().startswith("- "))
-    return [
-        [f"ETH{number:02d}", safeguard, None, None, None, Link("파일럿 프로토콜·코딩북", target)]
-        for number, safeguard in enumerate(safeguards, start=1)
-    ]
+    if text is None:
+        text = _read(DESIGN_DIR / "pilot-protocol-and-codingbook-v0.3.md")
+    items_by_section = {
+        heading: _section_items(text, heading)
+        for heading in {contract[1] for contract in ETHICS_SAFEGUARD_CONTRACT}
+    }
+    rows = []
+    for safeguard_id, heading, required_terms in ETHICS_SAFEGUARD_CONTRACT:
+        matches = [
+            item
+            for item in items_by_section[heading]
+            if all(term in item for term in required_terms)
+        ]
+        if not matches:
+            raise ValueError(f"missing {safeguard_id} safeguard in {heading}")
+        rows.append([safeguard_id, min(matches, key=len), None, None, None, Link("파일럿 프로토콜·코딩북", target)])
+    return rows
 
 
 def _display_width(value: object) -> int:
@@ -283,7 +359,7 @@ def _add_sheet(workbook: Workbook, title: str, headers: tuple[str, ...], rows: l
             value = worksheet.cell(row=row_number, column=column).value or ""
             width = worksheet.column_dimensions[get_column_letter(column)].width or 12
             line_counts.append(max(1, sum(max(1, (_display_width(line) + int(width) - 1) // int(width)) for line in str(value).splitlines())))
-        worksheet.row_dimensions[row_number].height = min(180, max(24, 15 * max(line_counts)))
+        worksheet.row_dimensions[row_number].height = min(300, max(24, 15 * max(line_counts)))
 
     worksheet.freeze_panes = "A2"
     worksheet.auto_filter.ref = f"A1:{worksheet.cell(row=worksheet.max_row, column=worksheet.max_column).coordinate}"
@@ -323,12 +399,34 @@ def _list_validation(worksheet, header: str, options: tuple[str, ...], max_row: 
         formula1=f'"{",".join(options)}"',
         allow_blank=True,
         showErrorMessage=True,
+        errorStyle="stop",
         errorTitle="허용되지 않은 값",
         error="목록에서 값을 선택하십시오.",
     )
     worksheet.add_data_validation(validation)
     validation.add(f"{letter}2:{letter}{max_row}")
     return validation
+
+
+def _normalize_xlsx(path: Path) -> None:
+    normalized_path = path.with_suffix(".normalized.xlsx")
+    fixed_time = (2026, 8, 12, 0, 0, 0)
+    with zipfile.ZipFile(path, "r") as source, zipfile.ZipFile(
+        normalized_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as target:
+        for name in sorted(source.namelist()):
+            source_info = source.getinfo(name)
+            data = source.read(name)
+            if name == "docProps/core.xml":
+                data = re.sub(
+                    rb"(<dcterms:modified\b[^>]*>)[^<]*(</dcterms:modified>)",
+                    rb"\g<1>2026-08-12T00:00:00Z\g<2>",
+                    data,
+                )
+            info = copy.copy(source_info)
+            info.date_time = fixed_time
+            target.writestr(info, data)
+    os.replace(normalized_path, path)
 
 
 def build_workbook(output_path: Path) -> None:
@@ -396,7 +494,24 @@ def build_workbook(output_path: Path) -> None:
     contribution_sheet = _add_sheet(workbook, "논문별기여", contribution_headers, _contribution_rows())
     _list_validation(contribution_sheet, "evidence_status", ("논문 직접 근거", "통합 해석", "후속 연구 명제 (검증 전)"))
 
-    _add_sheet(workbook, "사건코딩", EVENT_COLUMNS, [])
+    event_sheet = _add_sheet(workbook, "사건코딩", EVENT_COLUMNS, [])
+    divergence_dimension_validation = DataValidation(
+        type="list",
+        formula1='"유지,국소 조정,경계 재구성,자료 부족,자료 충돌"',
+        allow_blank=True,
+        showErrorMessage=True,
+        errorStyle="stop",
+        errorTitle="허용되지 않은 발산성 판정",
+        error="유지, 국소 조정, 경계 재구성, 자료 부족 또는 자료 충돌을 선택하십시오.",
+    )
+    event_sheet.add_data_validation(divergence_dimension_validation)
+    for header in ("dv1_decision", "dv2_decision", "dv3_decision", "dv4_decision"):
+        column = get_column_letter(EVENT_COLUMNS.index(header) + 1)
+        divergence_dimension_validation.add(f"{column}2:{column}500")
+    _list_validation(event_sheet, "divergence_event_decision", ("고발산 후보", "저발산 후보", "혼합", "판정 유보"))
+    _list_validation(event_sheet, "divergence_aggregation", ("차원 벡터 보존 (합산·평균 금지)",))
+    _list_validation(event_sheet, "p6_use_decision", ("경계 연결 평가", "내부 응집·강한 관계 평가", "차원별 분기", "판정 유보"))
+    _list_validation(event_sheet, "p7_use_decision", ("고발산 입력 평가", "입력 불충족", "고발산 입력 별도 확인", "판정 유보"))
 
     relation_sheet = _add_sheet(workbook, "관계망", RELATION_COLUMNS, [])
     relation_validation = DataValidation(
@@ -434,6 +549,7 @@ def build_workbook(output_path: Path) -> None:
     workbook.active = 0
     output_path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(output_path)
+    _normalize_xlsx(output_path)
 
 
 def main() -> None:

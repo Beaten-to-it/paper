@@ -2,9 +2,11 @@ import importlib
 import importlib.util
 import re
 import subprocess
+import time
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 from urllib.parse import unquote, urljoin, urlparse
 
 from openpyxl import load_workbook
@@ -13,7 +15,10 @@ from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from pypdf import PdfReader
 
-from tools.build_research_model_v03_workbook import build_workbook
+from tools import build_research_model_v03_workbook as workbook_builder
+
+
+build_workbook = workbook_builder.build_workbook
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,7 +47,26 @@ EVENT_COLUMNS = [
     "problem_resolution",
     "rival_explanation",
     "negative_case",
+    "dv1_decision",
+    "dv1_primary_source",
+    "dv1_corroboration",
+    "dv2_decision",
+    "dv2_primary_source",
+    "dv2_corroboration",
+    "dv3_decision",
+    "dv3_primary_source",
+    "dv3_corroboration",
+    "dv4_decision",
+    "dv4_primary_source",
+    "dv4_corroboration",
+    "divergence_vector",
+    "divergence_event_decision",
+    "divergence_aggregation",
+    "divergence_uncertainty",
+    "p6_use_decision",
+    "p7_use_decision",
 ]
+ETHICS_IDS = [f"ETH{number:02d}" for number in range(1, 15)]
 RELATION_BOOLEAN_COLUMNS = [
     "advice_relation",
     "trust_relation",
@@ -134,6 +158,60 @@ class ResearchModelV03AssetTests(unittest.TestCase):
                 )
             )
 
+    def test_event_sheet_binds_divergence_dimensions_and_p6_p7_decisions(self):
+        with TemporaryDirectory() as tmp:
+            _, workbook = self.build(tmp)
+            worksheet = workbook["사건코딩"]
+
+            self.assertEqual(headers(worksheet), EVENT_COLUMNS)
+            validations = {
+                validation.formula1: {str(cell_range) for cell_range in validation.ranges.ranges}
+                for validation in worksheet.data_validations.dataValidation
+            }
+            self.assertEqual(
+                validations,
+                {
+                    '"유지,국소 조정,경계 재구성,자료 부족,자료 충돌"': {
+                        "O2:O500",
+                        "R2:R500",
+                        "U2:U500",
+                        "X2:X500",
+                    },
+                    '"고발산 후보,저발산 후보,혼합,판정 유보"': {"AB2:AB500"},
+                    '"차원 벡터 보존 (합산·평균 금지)"': {"AC2:AC500"},
+                    '"경계 연결 평가,내부 응집·강한 관계 평가,차원별 분기,판정 유보"': {"AE2:AE500"},
+                    '"고발산 입력 평가,입력 불충족,고발산 입력 별도 확인,판정 유보"': {"AF2:AF500"},
+                },
+            )
+            for validation in worksheet.data_validations.dataValidation:
+                self.assertTrue(validation.showErrorMessage)
+                self.assertEqual(validation.errorStyle, "stop")
+
+    def test_ethics_safeguards_keep_canonical_ids_when_prose_becomes_bullets(self):
+        pilot_path = ROOT / "site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md"
+        original = pilot_path.read_text(encoding="utf-8")
+        safeguards = [row[1] for row in workbook_builder._ethics_rows()]
+        self.assertEqual(len(safeguards), 14)
+
+        mutated = original
+        for safeguard in safeguards[:9]:
+            before = f"\n{safeguard}\n"
+            after = f"\n- {safeguard}\n"
+            self.assertIn(before, mutated)
+            mutated = mutated.replace(before, after, 1)
+
+        with patch.object(workbook_builder, "_read", return_value=mutated):
+            rows = workbook_builder._ethics_rows()
+
+        self.assertEqual([row[0] for row in rows], ETHICS_IDS)
+        self.assertEqual([row[1] for row in rows], safeguards)
+
+        with TemporaryDirectory() as tmp:
+            _, workbook = self.build(tmp)
+            worksheet = workbook["윤리체크"]
+            self.assertEqual(worksheet.max_row, 15)
+            self.assertEqual([cell.value for cell in worksheet["A"][1:]], ETHICS_IDS)
+
     def test_relation_sheet_preserves_delivery_receipt_and_stance_per_relation(self):
         with TemporaryDirectory() as tmp:
             path, workbook = self.build(tmp)
@@ -191,10 +269,16 @@ class ResearchModelV03AssetTests(unittest.TestCase):
                     self.assertEqual(cell.fill.fgColor.rgb, "FF17365D", f"{worksheet.title}!{cell.coordinate}")
                     self.assertEqual(cell.font.name, "Malgun Gothic", f"{worksheet.title}!{cell.coordinate}")
                     self.assertTrue(cell.alignment.wrap_text, f"{worksheet.title}!{cell.coordinate}")
+                    self.assertEqual(cell.border.right.style, "thin", f"{worksheet.title}!{cell.coordinate}")
                     width = worksheet.column_dimensions[cell.column_letter].width
                     self.assertGreaterEqual(width, 12, f"{worksheet.title}!{cell.column_letter}")
                     self.assertLessEqual(width, 60, f"{worksheet.title}!{cell.column_letter}")
             self.assertEqual(workbook["README"]["A2"].fill.fgColor.rgb, "FFEAF2F8")
+            self.assertGreater(
+                workbook["논문별기여"].row_dimensions[3].height,
+                180,
+                "긴 직접 근거가 인쇄 렌더에서 잘리지 않아야 한다.",
+            )
 
     def test_dense_research_sheets_use_readable_multi_page_print_layouts(self):
         with TemporaryDirectory() as tmp:
@@ -204,6 +288,7 @@ class ResearchModelV03AssetTests(unittest.TestCase):
                 "구성개념": "$A:$A",
                 "명제추적": "$A:$A",
                 "논문별기여": "$A:$A",
+                "사건코딩": "$A:$A",
                 "관계망": "$A:$D",
             }
             for sheet_name, expected_title_columns in title_columns.items():
@@ -275,6 +360,16 @@ class ResearchModelV03AssetTests(unittest.TestCase):
             _, second = self.build(tmp, "second.xlsx")
 
             self.assertEqual(workbook_snapshot(first), workbook_snapshot(second))
+
+    def test_delayed_rebuild_is_byte_deterministic(self):
+        with TemporaryDirectory() as tmp:
+            first_path = Path(tmp) / "first.xlsx"
+            second_path = Path(tmp) / "second.xlsx"
+            build_workbook(first_path)
+            time.sleep(2.1)
+            build_workbook(second_path)
+
+            self.assertEqual(first_path.read_bytes(), second_path.read_bytes())
 
     def test_v03_visual_package_is_editable_sourced_and_claim_safe(self):
         module_name = "tools.build_research_model_v03_media"
