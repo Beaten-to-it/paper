@@ -81,6 +81,35 @@ class SiteContractTests(unittest.TestCase):
         self.assertNotIn("path: '.'", workflow)
         self.assertIn("node --test tests/protected_crypto.test.mjs", workflow)
 
+    def test_pages_workflow_installs_pinned_test_dependencies_and_graphviz(self):
+        requirements_path = REPO_ROOT / "requirements-ci.txt"
+        self.assertTrue(requirements_path.is_file(), "requirements-ci.txt must declare clean-runner dependencies")
+        requirements = {
+            line.strip()
+            for line in requirements_path.read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.startswith("#")
+        }
+        self.assertEqual(
+            requirements,
+            {
+                "openpyxl==3.1.5",
+                "Pillow==12.2.0",
+                "python-pptx==1.0.2",
+                "pypdf==6.13.3",
+            },
+        )
+
+        workflow = (REPO_ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
+        install_python = "python -m pip install --requirement requirements-ci.txt"
+        install_graphviz = "sudo apt-get install --yes graphviz"
+        probe_graphviz = "dot -V"
+        run_tests = "python -m unittest discover -s tests -v"
+        for command in (install_python, install_graphviz, probe_graphviz, run_tests):
+            self.assertIn(command, workflow)
+        self.assertLess(workflow.index(install_python), workflow.index(run_tests))
+        self.assertLess(workflow.index(install_graphviz), workflow.index(probe_graphviz))
+        self.assertLess(workflow.index(probe_graphviz), workflow.index(run_tests))
+
     def test_markdown_artifacts_have_an_internal_reader(self):
         viewer = SITE_ROOT / "viewer.html"
         viewer_script = SITE_ROOT / "assets" / "viewer.js"
