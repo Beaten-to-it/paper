@@ -70,6 +70,38 @@ CARD_COMMON_BOUNDARIES = (
     "NotebookLM 산출물은 근거로 사용하지 않는다.",
 )
 
+CARD_DIRECT_EVIDENCE_FACTS = {
+    "kemell-2025": (
+        "유럽 SW 기업 7곳의 다중 사례에서 회사가 정한 라이선스·도구, 현장 사용, 상향식 수요, 공식 제공 밖 도구의 자율 사용이 서로 다른 방식으로 병존했다.",
+        "공식 조직 라이선스가 없는 Company E에서도 개발자 사용이 널리 나타났고, 공식 제공 도구 밖 사용과 개인 시간 실험은 잠재적 Shadow IT 문제로 연결됐다.",
+        "저항의 직접 증거는 파일럿의 한 회의적 참여자처럼 얇았으며, 선택적 참여 때문에 저항이 관찰 표본 밖에 남았을 가능성을 저자들이 언급했다.",
+    ),
+    "neumann-2026": (
+        "GMT는 EU AI Act 위험 분류, 공식 화이트리스트, 경영진 승인, 내부 전문가 그룹의 검증을 갖춘 공식형 거버넌스를 사용했다.",
+        "Dinoco는 compliance와 최고경영진이 기존 대형 벤더 중심으로 도구를 정하는 위험회피형 방식을 사용했다.",
+        "Insight Inc.에는 비교 가능한 거버넌스 구조가 없었다.",
+        "ChatGPT는 세 조직 모두에서 가장 자주 사용됐지만, 비승인 Shadow IT 사용은 Dinoco와 GMT에서만 보고됐다.",
+        "Dinoco에는 비승인 ChatGPT 사용을 개인 시간 사용으로 재분류하는 비공식 합의가 있었고, GMT에서는 공식 정책이 있어도 구성원들이 업무에 개인 계정을 사용했다.",
+        "실용적 대안·학습·지원이 부족한 공식 규칙은 준수 책임을 개인에게 전가했고, 저자들은 기술 특성·조직 제약을 충분히 고려하지 않은 정책 번역이 정책-실무 간극과 Shadow IT를 낳는다고 해석했다.",
+        "연구는 역할별 사용과 정책 우회를 보여 주지만, 공식 리더와 비공식 AI 챔피언의 관계망은 측정하지 않았다.",
+    ),
+    "golgeci-2025": (
+        "이 통합적 문헌고찰과 개념적 과정 프레임워크는 AI 저항을 두려움, 비효능감, 반감의 비배타적 차원으로 설명한다.",
+        "AI 불신, 실존적 질문, 기술 성찰과 AI 접근성, 인간-AI 증강, 기술 정당화의 조직적 완화 메커니즘을 개념적으로 연결한다.",
+        "저자들의 세 연결은 이론적 명제이며, 효과나 시간 순서를 실증한 인과 결과가 아니다.",
+    ),
+    "battilana-casciaro-2012": (
+        "영국 NHS의 변화 프로젝트 68개에서, 구조적 공백이 많은 변화주도자는 더 제도적으로 이탈한 변화를 발의하는 경향을 보였다.",
+        "변화 채택에서는 구조적 공백의 주효과가 아니라 변화 괴리도와의 상호작용이 중요했다. 고괴리 변화에는 중개형 네트워크가, 기존 관행과 가까운 변화에는 응집형 네트워크가 더 유리했다.",
+        "이는 단일 변화주도자의 자아중심 네트워크와 NHS 맥락의 결과다.",
+    ),
+    "battilana-casciaro-2013": (
+        "영국 NHS의 68개 변화 프로젝트에서 영향력 있는 경계인과의 강한 관계는 변화 채택과 정(+)의 관계를 보였다.",
+        "명확한 저항자와의 관계강도는 주효과가 유의하지 않았고, 변화 괴리도가 낮을 때의 이점은 고괴리 조건에서 약해지거나 부정적으로 바뀔 수 있었다.",
+        "이 연구는 관계 상대의 태도와 변화 괴리도를 함께 고려해야 함을 보이지만, 고괴리 조건의 부정적 단순기울기는 모형에 따라 한계적 유의성을 포함해 과장할 수 없다.",
+    ),
+}
+
 CARD_V03_REQUIREMENTS = {
     "kemell-2025": (
         ("v0.3에서의 역할", "공식 AI 도입과 비공식 실험이 함께 존재하는 SW 조직의 사건 맥락을 제공한다."),
@@ -407,6 +439,14 @@ class ResearchModelV03Tests(unittest.TestCase):
             self.assertIn(label, by_heading[heading], f"{slug}: missing {label} in {heading}")
         for boundary in CARD_COMMON_BOUNDARIES:
             self.assertIn(boundary, text, f"{slug}: missing common boundary")
+        self.assertEqual(
+            tuple(line.strip() for line in by_heading["직접 근거"].splitlines() if line.strip()),
+            (
+                "**논문 직접 근거**",
+                *(f"- {fact}" for fact in CARD_DIRECT_EVIDENCE_FACTS[slug]),
+            ),
+            f"{slug}: direct-evidence section contains non-canonical content",
+        )
         for heading, clause in CARD_V03_REQUIREMENTS[slug]:
             self.assertIn(clause, by_heading[heading], f"{slug}: missing role contract in {heading}")
 
@@ -610,6 +650,45 @@ class ResearchModelV03Tests(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             self.assert_v03_card_contract("kemell-2025", mutated)
+
+    def test_v03_card_contract_rejects_the_fabricated_kemell_randomized_37_percent_claim(self):
+        path = ROOT / "site/downloads/kemell-2025/model-v0.3-contribution.md"
+        text = path.read_text(encoding="utf-8")
+        fabricated = "- 무작위 대조실험에서 생성형 AI가 개발자 생산성을 37% 높이는 인과효과가 확인됐다."
+        mutated = text.replace(
+            "## 직접 근거\n\n**논문 직접 근거**",
+            f"## 직접 근거\n\n**논문 직접 근거**\n\n{fabricated}",
+            1,
+        )
+
+        with self.assertRaises(AssertionError):
+            self.assert_v03_card_contract("kemell-2025", mutated)
+
+    def test_v03_card_contract_rejects_extra_direct_evidence_for_every_paper(self):
+        for slug in CARD_DIRECT_EVIDENCE_FACTS:
+            with self.subTest(slug=slug):
+                path = ROOT / "site/downloads" / slug / "model-v0.3-contribution.md"
+                text = path.read_text(encoding="utf-8")
+                mutated = text.replace(
+                    "## 직접 근거\n\n**논문 직접 근거**",
+                    "## 직접 근거\n\n**논문 직접 근거**\n\n- 원 분석에 없는 추가 직접근거다.",
+                    1,
+                )
+                with self.assertRaises(AssertionError):
+                    self.assert_v03_card_contract(slug, mutated)
+
+    def test_v03_card_contract_rejects_extra_direct_evidence_prose_for_every_paper(self):
+        for slug in CARD_DIRECT_EVIDENCE_FACTS:
+            with self.subTest(slug=slug):
+                path = ROOT / "site/downloads" / slug / "model-v0.3-contribution.md"
+                text = path.read_text(encoding="utf-8")
+                mutated = text.replace(
+                    "## 직접 근거\n\n**논문 직접 근거**",
+                    "## 직접 근거\n\n**논문 직접 근거**\n\n원 분석에 없는 추가 직접근거다.",
+                    1,
+                )
+                with self.assertRaises(AssertionError):
+                    self.assert_v03_card_contract(slug, mutated)
 
     def test_epistemic_and_no_fieldwork_boundaries_reject_a_proposition_mutation(self):
         theory_section = section(SPEC, "## 3. 이론적 위치와 근거 경계")
