@@ -147,6 +147,16 @@ class ResearchModelV03Tests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.assert_once(mutated, SPEC_TIE_PROTOCOL)
 
+    def test_every_paper_has_one_v03_contribution_card(self):
+        slugs = ["kemell-2025", "neumann-2026", "golgeci-2025", "battilana-casciaro-2012", "battilana-casciaro-2013"]
+        required = ["## 직접 근거", "## v0.3에서의 역할", "## 연결되는 명제", "## 검증하지 않은 것", "## 현장자료 요구"]
+        for slug in slugs:
+            path = ROOT / "site/downloads" / slug / "model-v0.3-contribution.md"
+            self.assertTrue(path.is_file(), slug)
+            text = path.read_text(encoding="utf-8")
+            self.assertTrue(all(heading in text for heading in required), slug)
+            self.assertIn("후속 연구 명제", text)
+
     def test_epistemic_and_no_fieldwork_boundaries_reject_a_proposition_mutation(self):
         theory_section = section(SPEC, "## 3. 이론적 위치와 근거 경계")
         propositions_section = section(SPEC, "## 9. 잠정 이론적 명제")
