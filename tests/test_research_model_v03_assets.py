@@ -67,12 +67,122 @@ EVENT_COLUMNS = [
     "p7_use_decision",
 ]
 ETHICS_IDS = [f"ETH{number:02d}" for number in range(1, 15)]
+SLIDE_SEMANTIC_CONTRACT = (
+    {
+        "title": "분산된 AI 변화주도자 네트워크",
+        "facts": ("공식 리더와 비공식 AI 챔피언", "P1-P7은 검증 전 명제"),
+        "sources": ("site/downloads/research-design/research-model-v0.3.md",),
+    },
+    {
+        "title": "공식 도입과 비공식 실험이 같은 사건에 겹친다",
+        "facts": ("Shadow AI", "구체적 AI 사건"),
+        "sources": (
+            "https://doi.org/10.1016/j.infsof.2025.107805",
+            "https://doi.org/10.1007/978-3-032-22375-3_18",
+        ),
+    },
+    {
+        "title": "다섯 논문은 현상·과정·경계의 서로 다른 근거다",
+        "facts": (
+            "Kemell et al. (2025)",
+            "다섯 논문을 합쳐도 P1-P7의 직접 검증 근거가 되지 않는다",
+        ),
+        "sources": (
+            "https://doi.org/10.1016/j.hrmr.2024.101075",
+            "https://doi.org/10.5465/amj.2009.0891",
+            "https://doi.org/10.1287/mnsc.1120.1583",
+        ),
+    },
+    {
+        "title": "AI 사건을 중심으로 세 분석 수준을 분리한다",
+        "facts": ("팀 맥락", "단위 계약: 전달 성공은 연결성"),
+        "sources": ("site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md",),
+    },
+    {
+        "title": "역할 보완성은 권한과 현장 기능의 실제 분담이다",
+        "facts": ("실행된 역할 보완성", "직급·친분·개인 열의 또는 해결 성과"),
+        "sources": ("https://doi.org/10.1016/j.hrmr.2024.101075",),
+    },
+    {
+        "title": "네트워크 연결성은 네 관계의 도달·확인을 묻는다",
+        "facts": ("수신·확인 근거", "발신자 보고만으로 수신을 확정하지 않는다"),
+        "sources": ("tools/build_research_model_v03_workbook.py",),
+    },
+    {
+        "title": "안전성과 효능감은 서로 다른 발언 판단이다",
+        "facts": ("발언 안전성", "같은 구성개념이 아니다"),
+        "sources": (
+            "site/downloads/research-design/research-model-v0.3.png",
+            "site/downloads/research-design/construct-dictionary-v0.3.md",
+        ),
+    },
+    {
+        "title": "한 사건의 반응은 복수 행동과 지배 경로로 코딩한다",
+        "facts": ("건설적 표면화", "우회와 Shadow AI는"),
+        "sources": ("site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md",),
+    },
+    {
+        "title": "변화 발산성이 유리한 관계 구조를 바꿀 수 있다",
+        "facts": ("내부 응집·강한 관계", "P7 경계:"),
+        "sources": (
+            "https://doi.org/10.5465/amj.2009.0891",
+            "https://doi.org/10.1287/mnsc.1120.1583",
+        ),
+    },
+    {
+        "title": "P1-P7은 경쟁 설명과 함께 검증할 명제다",
+        "facts": ("P1", "판정 규칙:"),
+        "sources": ("site/downloads/research-design/proposition-traceability-v0.3.md",),
+    },
+    {
+        "title": "탐색적 순차 혼합연구가 명제를 단계적으로 거른다",
+        "facts": ("프레임워크 개발", "특정 표본 수나 SEM 유형을 고정하지 않는다"),
+        "sources": (
+            "site/downloads/research-design/research-model-v0.3.md",
+            "site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md",
+        ),
+    },
+    {
+        "title": "현장 진입 전 윤리 게이트와 다음 결정을 확인한다",
+        "facts": ("IRB + 기업 보안·법무 승인", "NotebookLM 산출물은 근거가 아니다"),
+        "sources": (
+            "docs/reviews/2026-08-12-research-model-v0.3-review.md",
+            "site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md",
+        ),
+    },
+)
 RELATION_BOOLEAN_COLUMNS = [
     "advice_relation",
     "trust_relation",
     "approval_exception_relation",
     "risk_escalation_relation",
 ]
+
+
+def normalized_pdf_text(page) -> str:
+    """Recover Korean text from LibreOffice PDFs whose font map exposes CP949 bytes."""
+
+    decoded = []
+    byte_chars = []
+
+    def flush_byte_chars() -> None:
+        if not byte_chars:
+            return
+        raw = "".join(byte_chars).encode("latin1")
+        try:
+            decoded.append(raw.decode("cp949"))
+        except UnicodeDecodeError:
+            decoded.append(raw.decode("latin1"))
+        byte_chars.clear()
+
+    for character in page.extract_text() or "":
+        if ord(character) <= 255:
+            byte_chars.append(character)
+        else:
+            flush_byte_chars()
+            decoded.append(character)
+    flush_byte_chars()
+    return " ".join("".join(decoded).split())
 RELATION_TYPES = ["advice", "trust", "approval_exception", "risk_escalation"]
 RELATION_EVIDENCE_SUFFIXES = [
     "sender_report_delivery",
@@ -400,13 +510,33 @@ class ResearchModelV03AssetTests(unittest.TestCase):
             deck = Presentation(deck_path)
             self.assertEqual(len(deck.slides), 12)
             slide_texts = [
-                "\n".join(
-                    shape.text
-                    for shape in slide.shapes
-                    if getattr(shape, "has_text_frame", False)
+                " ".join(
+                    "\n".join(
+                        shape.text
+                        for shape in slide.shapes
+                        if getattr(shape, "has_text_frame", False)
+                    ).split()
                 )
                 for slide in deck.slides
             ]
+            slide_titles = []
+            for index, slide in enumerate(deck.slides, start=1):
+                title_shapes = [shape for shape in slide.shapes if shape.name == "Slide Title"]
+                self.assertEqual(len(title_shapes), 1, f"slide {index} title identity")
+                slide_titles.append(title_shapes[0].text)
+            expected_titles = [contract["title"] for contract in SLIDE_SEMANTIC_CONTRACT]
+            self.assertEqual(slide_titles, expected_titles)
+            self.assertEqual(len(set(slide_titles)), len(SLIDE_SEMANTIC_CONTRACT))
+
+            for index, (slide, slide_text, contract) in enumerate(
+                zip(deck.slides, slide_texts, SLIDE_SEMANTIC_CONTRACT, strict=True),
+                start=1,
+            ):
+                for fact in contract["facts"]:
+                    self.assertIn(fact, slide_text, f"slide {index} required fact")
+                source_notes = slide.notes_slide.notes_text_frame.text
+                for source in contract["sources"]:
+                    self.assertIn(source, source_notes, f"slide {index} required source")
             all_text = "\n".join(slide_texts)
 
             for phrase in (
@@ -493,7 +623,16 @@ class ResearchModelV03AssetTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
             pdf_path = deck_path.with_suffix(".pdf")
             self.assertTrue(pdf_path.is_file(), result.stderr or result.stdout)
-            self.assertEqual(len(PdfReader(pdf_path).pages), 12)
+            pages = PdfReader(pdf_path).pages
+            self.assertEqual(len(pages), 12)
+            for index, (page, contract) in enumerate(
+                zip(pages, SLIDE_SEMANTIC_CONTRACT, strict=True),
+                start=1,
+            ):
+                page_text = normalized_pdf_text(page)
+                self.assertIn(contract["title"], page_text, f"PDF page {index} title")
+                for fact in contract["facts"]:
+                    self.assertIn(fact, page_text, f"PDF page {index} required fact")
 
 
 if __name__ == "__main__":
