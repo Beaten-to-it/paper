@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-08-11",
+  "version": 3,
+  "updated": "2026-08-12",
   "papers": [
     {
       "slug": "kemell-2025",
@@ -115,6 +115,18 @@
           "storage": "pages",
           "size_bytes": 1493305,
           "sha256": "1d5bfc99e9bc94c8e86e347573f61542b01832ae38b58dc7e54e4cd240fc1e9c",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "kemell-2025-model-contribution",
+          "type": "model_contribution",
+          "title": "v0.3 연구모형 기여 카드",
+          "href": "downloads/kemell-2025/model-v0.3-contribution.md",
+          "storage": "pages",
+          "size_bytes": 2872,
+          "sha256": "e8eb51f72afcccb9a52d4fa04ed96abcec86c4ed29a6ef6f7e8e570ddd28fda8",
           "status": "complete",
           "provenance": "researcher_generated",
           "access": "public"
@@ -244,6 +256,18 @@
           "status": "complete",
           "provenance": "researcher_generated",
           "access": "public"
+        },
+        {
+          "id": "neumann-2026-model-contribution",
+          "type": "model_contribution",
+          "title": "v0.3 연구모형 기여 카드",
+          "href": "downloads/neumann-2026/model-v0.3-contribution.md",
+          "storage": "pages",
+          "size_bytes": 2848,
+          "sha256": "06d9d569af645d9008c894b0a1c67815d1503c6407428250bc5e36d80fe1ae69",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
         }
       ],
       "rights": {
@@ -367,6 +391,18 @@
           "storage": "pages",
           "size_bytes": 4523233,
           "sha256": "9eb39378e432c80607331a05048226e9c37ebc88e77642bbea84d5b7b8f9b749",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
+        },
+        {
+          "id": "golgeci-2025-model-contribution",
+          "type": "model_contribution",
+          "title": "v0.3 연구모형 기여 카드",
+          "href": "downloads/golgeci-2025/model-v0.3-contribution.md",
+          "storage": "pages",
+          "size_bytes": 2655,
+          "sha256": "9a3505a49b12f4ef8b7b6dedf4c7846ead042509af8fc19ffd13225b6097ded4",
           "status": "complete",
           "provenance": "researcher_generated",
           "access": "public"
@@ -514,6 +550,18 @@
           "status": "complete",
           "provenance": "researcher_generated",
           "access": "public"
+        },
+        {
+          "id": "battilana-casciaro-2012-model-contribution",
+          "type": "model_contribution",
+          "title": "v0.3 연구모형 기여 카드",
+          "href": "downloads/battilana-casciaro-2012/model-v0.3-contribution.md",
+          "storage": "pages",
+          "size_bytes": 2659,
+          "sha256": "0c3a98890a4107ffb035893bdd03701a5aa2a067f395059379d81e37ac9c5d00",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
         }
       ],
       "rights": {
@@ -658,6 +706,18 @@
           "status": "complete",
           "provenance": "researcher_generated",
           "access": "public"
+        },
+        {
+          "id": "battilana-casciaro-2013-model-contribution",
+          "type": "model_contribution",
+          "title": "v0.3 연구모형 기여 카드",
+          "href": "downloads/battilana-casciaro-2013/model-v0.3-contribution.md",
+          "storage": "pages",
+          "size_bytes": 2910,
+          "sha256": "231180bdd5cd0056bbbf60a3a5e804d9c784cfa3e2cacc97fb5c575eded58c53",
+          "status": "complete",
+          "provenance": "researcher_generated",
+          "access": "public"
         }
       ],
       "rights": {
@@ -671,7 +731,7 @@
     {
       "slug": "research-design",
       "kind": "research-design",
-      "citation": "Doctoral research design · updated 2026-08-11",
+      "citation": "Doctoral research design · updated 2026-08-12",
       "year": 2026,
       "title": "연구 종합과 설계",
       "summary": "개별 논문을 현상·AI 저항·네트워크 구조·관계 전략으로 연결하고 연구모형·인터뷰 설계로 전환하는 프로젝트 단위 산출물.",
@@ -704,8 +764,8 @@
           "title": "핵심 논문 매트릭스·연구모형·인터뷰 가이드",
           "href": "downloads/research-design/core-paper-matrix-research-model-interview-guide.md",
           "storage": "pages",
-          "size_bytes": 14774,
-          "sha256": "8c7a8bbfce1a95e1c8833f1d93f45e374042a742824458357da58f5a0512a807",
+          "size_bytes": 15557,
+          "sha256": "f18f6628eab32e48aae60de2a39147a7e842d558d90abb7b66183acd6f5d0b05",
           "status": "complete",
           "provenance": "researcher_generated"
         },
@@ -717,6 +777,94 @@
           "storage": "release",
           "size_bytes": 47973,
           "sha256": "e1ff9d0132c1d450c3c5f44db67c6e672c1e51fb13847b4fe12adfb6280ee3ec",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "research-model-v03",
+          "type": "research_model",
+          "title": "연구모형 v0.3",
+          "href": "downloads/research-design/research-model-v0.3.md",
+          "storage": "pages",
+          "size_bytes": 7140,
+          "sha256": "a22b5ade10be21e021948a232182c2ea249ce5b97b05721d3fe2cb52c52962b1",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "construct-dictionary-v03",
+          "type": "construct_dictionary",
+          "title": "구성개념 사전 v0.3",
+          "href": "downloads/research-design/construct-dictionary-v0.3.md",
+          "storage": "pages",
+          "size_bytes": 13913,
+          "sha256": "d92c4003c27dd76a5b849f67fa11362fce8742ae8897f7266c4831c62fb715b8",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "proposition-traceability-v03",
+          "type": "proposition_traceability",
+          "title": "명제 추적성 매트릭스 v0.3",
+          "href": "downloads/research-design/proposition-traceability-v0.3.md",
+          "storage": "pages",
+          "size_bytes": 12037,
+          "sha256": "2bf9ef5263ebb53bb8c3f4369e477384b4cf1b10c452d63bbe949132d10d3b3b",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "pilot-protocol-v03",
+          "type": "pilot_protocol",
+          "title": "파일럿 프로토콜·코딩북 v0.3",
+          "href": "downloads/research-design/pilot-protocol-and-codingbook-v0.3.md",
+          "storage": "pages",
+          "size_bytes": 11448,
+          "sha256": "54e836d29e95c525331117d5db81d8257351ba553480d508bbf1d7117395020a",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "research-model-v03-diagram",
+          "type": "model_diagram",
+          "title": "연구모형 v0.3 다이어그램",
+          "href": "downloads/research-design/research-model-v0.3.png",
+          "storage": "pages",
+          "size_bytes": 82404,
+          "sha256": "5124dd53700dee3ade1196fbe65407a6b2507f3388753e9ee00099f898020133",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "research-model-v03-workbook",
+          "type": "spreadsheet",
+          "title": "연구모형 v0.3 분석 워크북",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-12-v3/SW-AI-change-agent-research-model-v0.3-workbook.xlsx",
+          "storage": "release",
+          "size_bytes": 32352,
+          "sha256": "7fdbd00b3bc0702802fa6cb081e00d839bbc52374e86300f491461e8e266c8ae",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "research-model-v03-slides",
+          "type": "slides",
+          "title": "지도교수 세미나 발표자료 v0.3",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-12-v3/SW-AI-change-agent-research-model-v0.3-advisor-deck.pptx",
+          "storage": "release",
+          "size_bytes": 139036,
+          "sha256": "35c9b6c875bd326689823893f1bba095ffc0dc090e7bb10a7020790c01fcd628",
+          "status": "complete",
+          "provenance": "researcher_generated"
+        },
+        {
+          "id": "research-model-v03-slide-pdf",
+          "type": "slide_pdf",
+          "title": "지도교수 세미나 슬라이드 PDF v0.3",
+          "href": "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-12-v3/SW-AI-change-agent-research-model-v0.3-advisor-deck.pdf",
+          "storage": "release",
+          "size_bytes": 560446,
+          "sha256": "866089b52cfea9fbe3fc9c76b2be5a993352e384ebb86fa42f473ec89db5db59",
           "status": "complete",
           "provenance": "researcher_generated"
         }

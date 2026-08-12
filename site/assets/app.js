@@ -16,8 +16,14 @@ const typeLabels = {
   slides: "PPT",
   slide_pdf: "슬라이드 PDF",
   infographic: "인포그래픽",
+  model_contribution: "연구모형 기여",
+  model_diagram: "연구모형 다이어그램",
   spreadsheet: "XLSX",
+  construct_dictionary: "구성개념 사전",
+  pilot_protocol: "파일럿 프로토콜",
+  proposition_traceability: "명제 추적성",
   research_design: "연구설계",
+  research_model: "연구모형",
   research_synthesis: "연구 종합",
 };
 
@@ -65,7 +71,7 @@ function artifactHtml(artifact, paper) {
   const player = artifact.status === "complete" && artifact.type === "audio"
     ? `<audio controls preload="none" src="${escapeHtml(artifact.href)}"></audio>`
     : "";
-  const preview = artifact.status === "complete" && artifact.type === "infographic"
+  const preview = artifact.status === "complete" && ["infographic", "model_diagram"].includes(artifact.type)
     ? `<a href="${escapeHtml(artifact.href)}"><img class="artifact__preview" src="${escapeHtml(artifact.href)}" alt="${escapeHtml(artifact.title)}" loading="lazy"></a>`
     : "";
   return `<article class="artifact" data-type="${escapeHtml(artifact.type)}">
