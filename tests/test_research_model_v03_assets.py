@@ -1,9 +1,17 @@
+import importlib
+import importlib.util
+import re
+import subprocess
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import unquote, urljoin, urlparse
 
 from openpyxl import load_workbook
+from PIL import Image, ImageChops
+from pptx import Presentation
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pypdf import PdfReader
 
 from tools.build_research_model_v03_workbook import build_workbook
 
@@ -267,6 +275,130 @@ class ResearchModelV03AssetTests(unittest.TestCase):
             _, second = self.build(tmp, "second.xlsx")
 
             self.assertEqual(workbook_snapshot(first), workbook_snapshot(second))
+
+    def test_v03_visual_package_is_editable_sourced_and_claim_safe(self):
+        module_name = "tools.build_research_model_v03_media"
+        self.assertIsNotNone(
+            importlib.util.find_spec(module_name),
+            "The v0.3 media builder is not implemented.",
+        )
+        build_media = importlib.import_module(module_name).build_media
+
+        with TemporaryDirectory() as tmp:
+            diagram_path = Path(tmp) / "model.png"
+            deck_path = Path(tmp) / "deck.pptx"
+            build_media(diagram_path, deck_path)
+            second_diagram_path = Path(tmp) / "model-second.png"
+            second_deck_path = Path(tmp) / "deck-second.pptx"
+            build_media(second_diagram_path, second_deck_path)
+
+            with Image.open(diagram_path) as diagram:
+                self.assertEqual(diagram.size, (2400, 1600))
+                nonwhite = ImageChops.difference(diagram.convert("RGB"), Image.new("RGB", diagram.size, "white"))
+                content_bounds = nonwhite.getbbox()
+                self.assertIsNotNone(content_bounds)
+                left, top, right, bottom = content_bounds
+                self.assertGreaterEqual(min(left, top, 2400 - right, 1600 - bottom), 20)
+            self.assertEqual(diagram_path.read_bytes(), second_diagram_path.read_bytes())
+            self.assertEqual(deck_path.read_bytes(), second_deck_path.read_bytes())
+
+            deck = Presentation(deck_path)
+            self.assertEqual(len(deck.slides), 12)
+            slide_texts = [
+                "\n".join(
+                    shape.text
+                    for shape in slide.shapes
+                    if getattr(shape, "has_text_frame", False)
+                )
+                for slide in deck.slides
+            ]
+            all_text = "\n".join(slide_texts)
+
+            for phrase in (
+                "역할 보완성",
+                "네트워크 연결성",
+                "발언 안전성",
+                "발언 효능감",
+                "변화 발산성",
+                "검증 전 명제",
+            ):
+                self.assertIn(phrase, all_text)
+            self.assertIn("NotebookLM 산출물은 근거가 아니다", all_text)
+            self.assertIn("현장조사는 시작하지 않았다", all_text)
+            self.assertIsNone(re.search(r"검증됐다|입증됐다", all_text))
+
+            for index, slide in enumerate(deck.slides, start=1):
+                source_notes = slide.notes_slide.notes_text_frame.text
+                self.assertRegex(source_notes, r"(?s)\[Sources\]\s*\n\S+", f"slide {index}")
+                for shape in slide.shapes:
+                    self.assertGreaterEqual(shape.left, 0, f"slide {index}: {shape.name}")
+                    self.assertGreaterEqual(shape.top, 0, f"slide {index}: {shape.name}")
+                    self.assertGreaterEqual(
+                        shape.left,
+                        457200,
+                        f"slide {index}: {shape.name} violates the 0.5-inch left safe area",
+                    )
+                    self.assertLessEqual(
+                        shape.left + shape.width,
+                        deck.slide_width,
+                        f"slide {index}: {shape.name}",
+                    )
+                    self.assertLessEqual(
+                        shape.left + shape.width,
+                        deck.slide_width - 457200,
+                        f"slide {index}: {shape.name} violates the 0.5-inch right safe area",
+                    )
+                    self.assertLessEqual(
+                        shape.top + shape.height,
+                        deck.slide_height,
+                        f"slide {index}: {shape.name}",
+                    )
+                editable_shapes = [
+                    shape
+                    for shape in slide.shapes
+                    if shape.shape_type in (MSO_SHAPE_TYPE.AUTO_SHAPE, MSO_SHAPE_TYPE.TEXT_BOX)
+                    and getattr(shape, "has_text_frame", False)
+                ]
+                self.assertGreaterEqual(len(editable_shapes), 3, f"slide {index}")
+
+            proposition_slide = slide_texts[9]
+            for proposition in (f"P{number}" for number in range(1, 8)):
+                self.assertIn(proposition, proposition_slide)
+            self.assertIn("검증 전 명제", proposition_slide)
+
+    def test_v03_pdf_export_has_twelve_pages_when_libreoffice_is_available(self):
+        module_name = "tools.build_research_model_v03_media"
+        self.assertIsNotNone(importlib.util.find_spec(module_name))
+        build_media = importlib.import_module(module_name).build_media
+        soffice = Path(r"C:\Program Files\LibreOffice\program\soffice.exe")
+        if not soffice.is_file():
+            self.skipTest("LibreOffice is not installed")
+
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            deck_path = tmp_path / "deck.pptx"
+            build_media(tmp_path / "model.png", deck_path)
+            profile = tmp_path / "lo-profile"
+            result = subprocess.run(
+                [
+                    str(soffice),
+                    "--headless",
+                    f"-env:UserInstallation={profile.resolve().as_uri()}",
+                    "--convert-to",
+                    "pdf",
+                    "--outdir",
+                    str(tmp_path),
+                    str(deck_path),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            pdf_path = deck_path.with_suffix(".pdf")
+            self.assertTrue(pdf_path.is_file(), result.stderr or result.stdout)
+            self.assertEqual(len(PdfReader(pdf_path).pages), 12)
 
 
 if __name__ == "__main__":
