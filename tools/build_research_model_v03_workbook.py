@@ -21,6 +21,14 @@ BODY_FONT = Font(name=FONT_NAME, size=10, color="FF1F2937")
 LINK_FONT = Font(name=FONT_NAME, size=10, color="FF0563C1", underline="single")
 HEADER_BORDER = Border(bottom=Side(style="medium", color="FF8EA9C1"))
 BODY_BORDER = Border(bottom=Side(style="thin", color="FFD9E2F3"))
+PUBLIC_SITE_BASE = "https://beaten-to-it.github.io/paper/"
+DENSE_PRINT_SHEETS = {"구성개념", "명제추적", "논문별기여", "관계망"}
+PRINT_TITLE_COLUMNS = {
+    "구성개념": "A:A",
+    "명제추적": "A:A",
+    "논문별기여": "A:A",
+    "관계망": "A:D",
+}
 
 EVENT_COLUMNS = (
     "event_code",
@@ -38,20 +46,25 @@ EVENT_COLUMNS = (
     "rival_explanation",
     "negative_case",
 )
+RELATION_TYPES = ("advice", "trust", "approval_exception", "risk_escalation")
+RELATION_EVIDENCE_SUFFIXES = (
+    "sender_report_delivery",
+    "receipt_confirmation_evidence",
+    "recipient_stance",
+)
 RELATION_COLUMNS = (
     "event_code",
     "respondent_code",
     "alter_code",
     "alter_role_category",
-    "advice_relation",
-    "trust_relation",
-    "approval_exception_relation",
-    "risk_escalation_relation",
+    *(f"{relation}_relation" for relation in RELATION_TYPES),
     "contact_frequency",
     "perceived_trust",
-    "sender_report_delivery",
-    "receipt_confirmation_evidence",
-    "recipient_stance",
+    *(
+        f"{relation}_{suffix}"
+        for relation in RELATION_TYPES
+        for suffix in RELATION_EVIDENCE_SUFFIXES
+    ),
 )
 
 
@@ -59,6 +72,10 @@ RELATION_COLUMNS = (
 class Link:
     label: str
     target: str
+
+
+def _public_link(path: str) -> str:
+    return f"{PUBLIC_SITE_BASE}{path}"
 
 
 def _read(path: Path) -> str:
@@ -123,7 +140,7 @@ def _construct_rows() -> list[list[object]]:
     for heading, body in _heading_sections(text, 3):
         values = {cells[0]: _plain(cells[1]) for cells in _table_rows(body) if len(cells) == 2}
         if all(field in values for field in fields):
-            rows.append([heading, *(values[field] for field in fields), Link("구성개념 사전", "../../site/downloads/research-design/construct-dictionary-v0.3.md")])
+            rows.append([heading, *(values[field] for field in fields), Link("구성개념 사전", _public_link("downloads/research-design/construct-dictionary-v0.3.md"))])
     if len(rows) != 12:
         raise ValueError(f"expected 12 construct rows, found {len(rows)}")
     return rows
@@ -167,7 +184,7 @@ def _proposition_rows() -> list[list[object]]:
                 status,
                 *(values[field] for field in fields),
                 "미검토",
-                Link("명제 추적표", "../../site/downloads/research-design/proposition-traceability-v0.3.md"),
+                Link("명제 추적표", _public_link("downloads/research-design/proposition-traceability-v0.3.md")),
             ]
         )
     return rows
@@ -198,14 +215,14 @@ def _contribution_rows() -> list[list[object]]:
                 _bullet_text(_section(text, "연결되는 명제")),
                 _bullet_text(_section(text, "검증하지 않은 것")),
                 _bullet_text(_section(text, "현장자료 요구")),
-                Link(f"{citation} 기여 카드", f"../../site/downloads/{slug}/model-v0.3-contribution.md"),
+                Link(f"{citation} 기여 카드", _public_link(f"downloads/{slug}/model-v0.3-contribution.md")),
             ]
         )
     return rows
 
 
 def _ethics_rows() -> list[list[object]]:
-    target = "../../site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md"
+    target = _public_link("downloads/research-design/pilot-protocol-and-codingbook-v0.3.md")
     text = _read(DESIGN_DIR / "pilot-protocol-and-codingbook-v0.3.md")
     safeguards = []
     for heading in ("사용 전 gate", "연결코드와 내부자 safeguards"):
@@ -274,11 +291,19 @@ def _add_sheet(workbook: Workbook, title: str, headers: tuple[str, ...], rows: l
     worksheet.sheet_view.zoomScale = 85
     worksheet.print_area = worksheet.auto_filter.ref
     worksheet.print_title_rows = "1:1"
-    worksheet.sheet_properties.pageSetUpPr.fitToPage = True
-    worksheet.page_setup.orientation = "landscape" if worksheet.max_column > 5 else "portrait"
-    worksheet.page_setup.paperSize = worksheet.PAPERSIZE_A3 if worksheet.max_column > 8 else worksheet.PAPERSIZE_A4
-    worksheet.page_setup.fitToWidth = 1
-    worksheet.page_setup.fitToHeight = 0
+    dense_print = title in DENSE_PRINT_SHEETS
+    worksheet.page_setup.orientation = "landscape" if dense_print or worksheet.max_column > 5 else "portrait"
+    worksheet.page_setup.paperSize = worksheet.PAPERSIZE_A3 if dense_print or worksheet.max_column > 8 else worksheet.PAPERSIZE_A4
+    if dense_print:
+        worksheet.sheet_properties.pageSetUpPr.fitToPage = False
+        worksheet.page_setup.scale = 100
+        worksheet.page_setup.fitToWidth = None
+        worksheet.page_setup.fitToHeight = None
+        worksheet.print_title_cols = PRINT_TITLE_COLUMNS[title]
+    else:
+        worksheet.sheet_properties.pageSetUpPr.fitToPage = True
+        worksheet.page_setup.fitToWidth = 1
+        worksheet.page_setup.fitToHeight = 0
     worksheet.sheet_properties.pageSetUpPr.autoPageBreaks = False
     worksheet.page_margins.left = 0.25
     worksheet.page_margins.right = 0.25
@@ -318,10 +343,10 @@ def build_workbook(output_path: Path) -> None:
 
     readme_rows = [
         ["현재 상태", "현장조사 전 연구준비 산출물이다. 인터뷰·모집·이름 생성·조직 자료 수집은 시작하지 않았다.", None],
-        ["명제 상태", "P1-P7은 모두 검증 전 후속 연구 명제다.", Link("연구모형 개요", "../../site/downloads/research-design/research-model-v0.3.md")],
-        ["증거 경계", "논문 직접 근거, 통합 해석, 후속 연구 명제 (검증 전)를 구분한다. NotebookLM 산출물은 근거로 사용하지 않는다.", Link("명제 추적표", "../../site/downloads/research-design/proposition-traceability-v0.3.md")],
-        ["입력 원칙", "사건코딩·관계망·부정사례는 승인 뒤 사용할 빈 템플릿이다. 실명·고객명·기밀·계정 정보를 입력하지 않는다.", Link("파일럿 프로토콜·코딩북", "../../site/downloads/research-design/pilot-protocol-and-codingbook-v0.3.md")],
-        ["구성개념 원본", "12개 구성개념의 정의·경계·귀속 규칙", Link("구성개념 사전", "../../site/downloads/research-design/construct-dictionary-v0.3.md")],
+        ["명제 상태", "P1-P7은 모두 검증 전 후속 연구 명제다.", Link("연구모형 개요", _public_link("downloads/research-design/research-model-v0.3.md"))],
+        ["증거 경계", "논문 직접 근거, 통합 해석, 후속 연구 명제 (검증 전)를 구분한다. NotebookLM 산출물은 근거로 사용하지 않는다.", Link("명제 추적표", _public_link("downloads/research-design/proposition-traceability-v0.3.md"))],
+        ["입력 원칙", "사건코딩·관계망·부정사례는 승인 뒤 사용할 빈 템플릿이다. 실명·고객명·기밀·계정 정보를 입력하지 않는다.", Link("파일럿 프로토콜·코딩북", _public_link("downloads/research-design/pilot-protocol-and-codingbook-v0.3.md"))],
+        ["구성개념 원본", "12개 구성개념의 정의·경계·귀속 규칙", Link("구성개념 사전", _public_link("downloads/research-design/construct-dictionary-v0.3.md"))],
     ]
     _add_sheet(workbook, "README", ("항목", "내용", "source_markdown"), readme_rows)
 
@@ -374,7 +399,15 @@ def build_workbook(output_path: Path) -> None:
     _add_sheet(workbook, "사건코딩", EVENT_COLUMNS, [])
 
     relation_sheet = _add_sheet(workbook, "관계망", RELATION_COLUMNS, [])
-    relation_validation = DataValidation(type="list", formula1='"TRUE,FALSE"', allow_blank=True)
+    relation_validation = DataValidation(
+        type="list",
+        formula1='"TRUE,FALSE"',
+        allow_blank=True,
+        showErrorMessage=True,
+        errorStyle="stop",
+        errorTitle="허용되지 않은 관계 값",
+        error="TRUE 또는 FALSE를 선택하십시오.",
+    )
     relation_sheet.add_data_validation(relation_validation)
     for header in RELATION_COLUMNS[4:8]:
         column = get_column_letter(RELATION_COLUMNS.index(header) + 1)

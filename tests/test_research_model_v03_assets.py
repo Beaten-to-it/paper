@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from urllib.parse import unquote, urljoin, urlparse
 
 from openpyxl import load_workbook
 
@@ -39,6 +40,12 @@ RELATION_BOOLEAN_COLUMNS = [
     "trust_relation",
     "approval_exception_relation",
     "risk_escalation_relation",
+]
+RELATION_TYPES = ["advice", "trust", "approval_exception", "risk_escalation"]
+RELATION_EVIDENCE_SUFFIXES = [
+    "sender_report_delivery",
+    "receipt_confirmation_evidence",
+    "recipient_stance",
 ]
 
 
@@ -119,6 +126,47 @@ class ResearchModelV03AssetTests(unittest.TestCase):
                 )
             )
 
+    def test_relation_sheet_preserves_delivery_receipt_and_stance_per_relation(self):
+        with TemporaryDirectory() as tmp:
+            path, workbook = self.build(tmp)
+            worksheet = workbook["관계망"]
+            relation_headers = headers(worksheet)
+
+            expected_evidence_columns = [
+                f"{relation}_{suffix}"
+                for relation in RELATION_TYPES
+                for suffix in RELATION_EVIDENCE_SUFFIXES
+            ]
+            self.assertTrue(set(expected_evidence_columns).issubset(relation_headers))
+            self.assertFalse(set(RELATION_EVIDENCE_SUFFIXES).intersection(relation_headers))
+            self.assertEqual(len(set(expected_evidence_columns)), 12)
+
+            values = {
+                "event_code": "EV-TEST",
+                "respondent_code": "R-TEST",
+                "alter_code": "A-TEST",
+                "advice_relation": True,
+                "trust_relation": True,
+                "advice_sender_report_delivery": "조언 전달 보고",
+                "advice_receipt_confirmation_evidence": "조언 수신 확인",
+                "advice_recipient_stance": "수용",
+                "trust_sender_report_delivery": "신뢰 전달 보고",
+                "trust_receipt_confirmation_evidence": "신뢰 수신 미확인",
+                "trust_recipient_stance": "보류",
+            }
+            for column_name, value in values.items():
+                worksheet.cell(row=2, column=relation_headers.index(column_name) + 1).value = value
+            workbook.save(path)
+
+            rebuilt = load_workbook(path, read_only=False, data_only=False)["관계망"]
+            saved = dict(zip(headers(rebuilt), [cell.value for cell in rebuilt[2]]))
+            for column_name, value in values.items():
+                self.assertEqual(saved[column_name], value)
+            self.assertNotEqual(
+                saved["advice_receipt_confirmation_evidence"],
+                saved["trust_receipt_confirmation_evidence"],
+            )
+
     def test_headers_filters_freeze_panes_and_layout_are_usable(self):
         with TemporaryDirectory() as tmp:
             _, workbook = self.build(tmp)
@@ -140,9 +188,30 @@ class ResearchModelV03AssetTests(unittest.TestCase):
                     self.assertLessEqual(width, 60, f"{worksheet.title}!{cell.column_letter}")
             self.assertEqual(workbook["README"]["A2"].fill.fgColor.rgb, "FFEAF2F8")
 
-    def test_validations_and_paper_lab_links_are_operational(self):
+    def test_dense_research_sheets_use_readable_multi_page_print_layouts(self):
         with TemporaryDirectory() as tmp:
             _, workbook = self.build(tmp)
+
+            title_columns = {
+                "구성개념": "$A:$A",
+                "명제추적": "$A:$A",
+                "논문별기여": "$A:$A",
+                "관계망": "$A:$D",
+            }
+            for sheet_name, expected_title_columns in title_columns.items():
+                worksheet = workbook[sheet_name]
+                self.assertFalse(worksheet.sheet_properties.pageSetUpPr.fitToPage, sheet_name)
+                self.assertIsNone(worksheet.page_setup.fitToWidth, sheet_name)
+                self.assertIsNone(worksheet.page_setup.fitToHeight, sheet_name)
+                self.assertEqual(worksheet.page_setup.scale, 100, sheet_name)
+                self.assertEqual(str(worksheet.page_setup.paperSize), str(worksheet.PAPERSIZE_A3), sheet_name)
+                self.assertEqual(worksheet.page_setup.orientation, worksheet.ORIENTATION_LANDSCAPE, sheet_name)
+                self.assertEqual(worksheet.print_title_rows, "$1:$1", sheet_name)
+                self.assertEqual(worksheet.print_title_cols, expected_title_columns, sheet_name)
+
+    def test_validations_and_paper_lab_links_are_operational(self):
+        with TemporaryDirectory() as tmp:
+            path, workbook = self.build(tmp)
 
             proposition_validations = workbook["명제추적"].data_validations.dataValidation
             self.assertEqual(len(proposition_validations), 2)
@@ -168,9 +237,29 @@ class ResearchModelV03AssetTests(unittest.TestCase):
             ]
             self.assertGreaterEqual(len(links), 29)
             for target in links:
-                self.assertTrue(target.startswith("../../site/downloads/"), target)
-                expected = ROOT / "output/release-assets" / target
-                self.assertTrue(expected.resolve().is_file(), target)
+                parsed = urlparse(target)
+                self.assertEqual((parsed.scheme, parsed.netloc), ("https", "beaten-to-it.github.io"), target)
+                self.assertTrue(parsed.path.startswith("/paper/downloads/"), target)
+                self.assertEqual(urljoin(path.as_uri(), target), target, target)
+                source = ROOT / "site" / unquote(parsed.path.removeprefix("/paper/"))
+                self.assertTrue(source.is_file(), target)
+
+    def test_boolean_relation_validation_uses_stop_error_alerts(self):
+        with TemporaryDirectory() as tmp:
+            _, workbook = self.build(tmp)
+            validations = workbook["관계망"].data_validations.dataValidation
+
+            self.assertEqual(len(validations), 1)
+            validation = validations[0]
+            self.assertEqual(validation.formula1, '"TRUE,FALSE"')
+            self.assertEqual(
+                {str(cell_range) for cell_range in validation.ranges.ranges},
+                {"E2:E500", "F2:F500", "G2:G500", "H2:H500"},
+            )
+            self.assertTrue(validation.showErrorMessage)
+            self.assertEqual(validation.errorStyle, "stop")
+            self.assertEqual(validation.errorTitle, "허용되지 않은 관계 값")
+            self.assertIn("TRUE 또는 FALSE", validation.error)
 
     def test_rebuild_has_stable_structural_values(self):
         with TemporaryDirectory() as tmp:
