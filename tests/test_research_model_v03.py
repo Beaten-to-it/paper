@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = (ROOT / "docs/superpowers/specs/2026-08-12-research-model-v0.3-design.md").read_text(encoding="utf-8")
 GUIDE = (ROOT / "site/downloads/research-design/core-paper-matrix-research-model-interview-guide.md").read_text(encoding="utf-8")
+MATRIX = GUIDE
 LEDGER = (ROOT / "docs/reviews/2026-08-12-research-model-v0.3-review.md").read_text(encoding="utf-8")
 
 
@@ -173,6 +174,50 @@ PILOT_FIXED_CLAUSES = (
     "고용주에게 원자료를 제공하지 않는다. 법률 또는 IRB 승인 안전절차의 공개 한계는 동의서에 사전 명시한다.",
 )
 
+DIVERGENCE_DIMENSION_CONTRACT = {
+    "DV1": {
+        "name": "업무 발산성",
+        "probe_terms": ("개발·검토·배포 절차", "사건 전", "사건 후"),
+        "source_terms": ("구성원", "공식 리더"),
+        "corroboration_terms": ("업무 절차", "검토 체크리스트"),
+    },
+    "DV2": {
+        "name": "전문성 발산성",
+        "probe_terms": ("필요 지식", "직무 정체성", "숙련 가치"),
+        "source_terms": ("구성원", "비공식 AI 챔피언"),
+        "corroboration_terms": ("직무기술", "교육"),
+    },
+    "DV3": {
+        "name": "권한 발산성",
+        "probe_terms": ("판단·승인·예외·중단 권한", "누구에게서", "누구에게로"),
+        "source_terms": ("공식 리더", "권한을 행사한 구성원"),
+        "corroboration_terms": ("승인", "예외 기록"),
+    },
+    "DV4": {
+        "name": "책임 발산성",
+        "probe_terms": ("오류·품질·보안 책임", "검증 방식", "사건 전후"),
+        "source_terms": ("책임자", "실무자"),
+        "corroboration_terms": ("품질·보안 정책", "사후검토"),
+    },
+}
+
+DIVERGENCE_DECISION_CONTRACT = {
+    "고발산 후보": "서로 다른 두 차원 이상이 `경계 재구성`이고 각 차원이 교차확인되면 고발산 후보로 둔다.",
+    "저발산 후보": "세 차원 이상이 `유지` 또는 `국소 조정`이고 `경계 재구성`이 없으며 각 차원이 교차확인되면 저발산 후보로 둔다.",
+    "혼합": "한 차원만 `경계 재구성`이거나 차원별 방향이 엇갈리면 혼합으로 두고 차원 벡터를 그대로 보고한다.",
+    "판정 유보": "교차확인된 차원이 세 개 미만이거나 핵심 자료가 충돌하면 판정을 유보하고 P6/P7 비교에 넣지 않는다.",
+}
+
+ETHICS_STAGE_CONTRACT = (
+    ("D0", ("지도교수", "근거상태")),
+    ("G0", ("연구동의서", "철회", "익명화·연결코드", "사건·관계망 코딩북", "중단·보고")),
+    ("G1", ("IRB", "기업 보안·법무·데이터 보호", "자료접근 협약", "서면 승인")),
+    ("H1", ("G0와 G1", "독립 모집 담당자", "모집·접촉")),
+    ("H2", ("인지면접", "각 1명씩 총 3명", "승인 범위")),
+    ("H3", ("파일럿", "인지면접", "승인된 프로토콜")),
+    ("A0", ("순차 혼합방법", "다중 사례연구", "사회연결망 분석")),
+)
+
 
 def section(text, heading):
     start = text.index(heading)
@@ -251,6 +296,13 @@ def prose_paragraphs(text):
     return tuple(paragraphs)
 
 
+def numbered_steps(text):
+    return tuple(
+        (int(number), body.strip())
+        for number, body in re.findall(r"^(\d+)\.\s+(.+)$", text, re.MULTILINE)
+    )
+
+
 class ResearchModelV03Tests(unittest.TestCase):
     def assert_once(self, text, clause):
         self.assertEqual(text.count(clause), 1, f"missing, duplicated, or mutated contract clause: {clause}")
@@ -292,6 +344,76 @@ class ResearchModelV03Tests(unittest.TestCase):
             self.assertIn(boundary, text, f"{slug}: missing common boundary")
         for heading, clause in CARD_V03_REQUIREMENTS[slug]:
             self.assertIn(clause, by_heading[heading], f"{slug}: missing role contract in {heading}")
+
+    def assert_divergence_measurement_contract(self, protocol):
+        measurement = markdown_section(protocol, "변화 발산성의 사건 수준 측정")
+        rows = markdown_table_rows(measurement)
+        dimension_header = ("코드", "차원", "직접 탐침", "주 자료원", "교차확인")
+        decision_header = ("사건 판정", "판정 규칙", "P6/P7 사용")
+        self.assertIn(dimension_header, rows)
+        self.assertIn(decision_header, rows)
+
+        dimension_start = rows.index(dimension_header) + 1
+        decision_start = rows.index(decision_header)
+        dimension_rows = rows[dimension_start:decision_start]
+        self.assertEqual(len(dimension_rows), 4)
+        self.assertEqual({row[0] for row in dimension_rows}, set(DIVERGENCE_DIMENSION_CONTRACT))
+        for row in dimension_rows:
+            self.assertEqual(len(row), 5)
+            code, name, probe, sources, corroboration = row
+            contract = DIVERGENCE_DIMENSION_CONTRACT[code]
+            self.assertEqual(name, contract["name"])
+            for term in contract["probe_terms"]:
+                self.assertIn(term, probe, f"{code}: incomplete direct probe")
+            for term in contract["source_terms"]:
+                self.assertIn(term, sources, f"{code}: incomplete source plan")
+            for term in contract["corroboration_terms"]:
+                self.assertIn(term, corroboration, f"{code}: incomplete corroboration plan")
+
+        decision_rows = rows[decision_start + 1:]
+        self.assertEqual({row[0] for row in decision_rows}, set(DIVERGENCE_DECISION_CONTRACT))
+        for row in decision_rows:
+            self.assertEqual(len(row), 3)
+            self.assertEqual(row[1], DIVERGENCE_DECISION_CONTRACT[row[0]])
+
+        for clause in (
+            "각 차원은 `유지`, `국소 조정`, `경계 재구성`, `자료 부족`, `자료 충돌` 중 하나로 사건별 판정한다.",
+            "같은 사람의 반복 진술은 하나의 자료원으로 센다.",
+            "연구 1에서는 DV1-DV4를 합산하거나 평균하지 않고 차원 벡터로 보존한다.",
+            "고발산·저발산은 측정척도가 아니라 위 규칙에 따른 질적 사례비교용 잠정 분류다.",
+        ):
+            self.assert_once(measurement, clause)
+
+        event_rows = markdown_table_rows(markdown_section(protocol, "사건 코드"))
+        divergence_event = tuple(row for row in event_rows if row and row[0] == "EV2-D 변화 발산성")
+        self.assertEqual(len(divergence_event), 1)
+        self.assertIn("DV1-DV4", divergence_event[0][1])
+        self.assertIn("관계 동원 전", divergence_event[0][2])
+
+    def assert_ethics_stage_ordering(self, matrix):
+        next_steps = markdown_section(matrix, "13. 바로 다음 작업")
+        steps = numbered_steps(next_steps)
+        self.assertEqual(tuple(number for number, _ in steps), tuple(range(1, 8)))
+        stage_bodies = {}
+        stages = []
+        for _, body in steps:
+            match = re.match(r"`([A-Z]\d)`\s+", body)
+            self.assertIsNotNone(match, f"missing stage identifier: {body}")
+            stage = match.group(1)
+            stages.append(stage)
+            stage_bodies[stage] = body
+        expected_stages = tuple(stage for stage, _ in ETHICS_STAGE_CONTRACT)
+        self.assertEqual(tuple(stages), expected_stages)
+        for stage, terms in ETHICS_STAGE_CONTRACT:
+            for term in terms:
+                self.assertIn(term, stage_bodies[stage], f"{stage}: missing ordering safeguard {term}")
+
+        for human_stage in ("H1", "H2", "H3"):
+            self.assertLess(stages.index("G0"), stages.index(human_stage))
+            self.assertLess(stages.index("G1"), stages.index(human_stage))
+
+        sampling = section(matrix, "### 4.2 예비 표집")
+        self.assertIn("G0 프로토콜 확정과 G1 서면 승인이 끝나기 전에는 후보 팀이나 개인을 모집·접촉하지 않는다.", sampling)
 
     def test_level_contract_is_complete_and_rejects_a_missing_row(self):
         level_section = section(SPEC, "## 4. 분석단위와 다수준 구조")
@@ -515,3 +637,31 @@ class ResearchModelV03Tests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             for clause in PILOT_FIXED_CLAUSES:
                 self.assert_once(mutated, clause)
+
+    def test_change_divergence_has_a_complete_event_measurement_path(self):
+        protocol = self.public_v03_documents()["pilot-protocol-and-codingbook-v0.3.md"]
+        self.assert_divergence_measurement_contract(protocol)
+
+        missing_dimension = protocol.replace(
+            "| DV4 | 책임 발산성 |", "| DX4 | 책임 변화 |", 1
+        )
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(missing_dimension)
+
+        weakened_decision = protocol.replace(
+            "서로 다른 두 차원 이상이 `경계 재구성`", "한 차원이 `경계 재구성`", 1
+        )
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(weakened_decision)
+
+    def test_matrix_requires_ethics_gates_before_any_human_contact(self):
+        self.assert_ethics_stage_ordering(MATRIX)
+
+        next_steps = markdown_section(MATRIX, "13. 바로 다음 작업")
+        lines = next_steps.splitlines()
+        cognitive_index = next(index for index, line in enumerate(lines) if "`H2`" in line)
+        approval_index = next(index for index, line in enumerate(lines) if "`G1`" in line)
+        lines[cognitive_index], lines[approval_index] = lines[approval_index], lines[cognitive_index]
+        mutated = MATRIX.replace(next_steps, "\n".join(lines), 1)
+        with self.assertRaises(AssertionError):
+            self.assert_ethics_stage_ordering(mutated)
