@@ -208,6 +208,22 @@ class CatalogValidationTests(unittest.TestCase):
             (6, 62),
         )
 
+    def test_production_catalog_accepts_rebuilt_workbook_release_metadata(self):
+        catalog = self.production_catalog()
+        published = self.release_index(catalog)
+        design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+        workbook = next(artifact for artifact in design["artifacts"] if artifact["id"] == "research-model-v03-workbook")
+        published[workbook["href"]] = {
+            "size_bytes": 33_513,
+            "sha256": "ebe7d6047a5283580e284e622b7e214bd288648addc0fdb8249ead0d3909bee0",
+        }
+
+        try:
+            result = validate(catalog, SITE_ROOT, published)
+        except CatalogError as error:
+            self.fail(str(error))
+        self.assertEqual(result, (6, 62))
+
     def test_v3_catalog_has_five_ten_slot_papers_and_twelve_design_artifacts(self):
         catalog = self.production_catalog()
         papers = [paper for paper in catalog["papers"] if paper["kind"] == "paper"]
