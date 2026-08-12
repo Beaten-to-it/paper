@@ -99,6 +99,80 @@ CARD_V03_REQUIREMENTS = {
     ),
 }
 
+V03_PACKAGE_FILES = (
+    "research-model-v0.3.md",
+    "construct-dictionary-v0.3.md",
+    "proposition-traceability-v0.3.md",
+    "pilot-protocol-and-codingbook-v0.3.md",
+)
+
+V03_CONSTRUCTS = (
+    "실행된 역할 보완성",
+    "활성화된 네트워크 연결성",
+    "발언 안전성",
+    "발언 효능감",
+    "구성원 반응",
+    "사건 지배 경로",
+    "변화 발산성",
+    "기초 네트워크 구조",
+    "정책-실무 정합성",
+    "책임 있는 AI 채택",
+    "공식 리더",
+    "비공식 AI 챔피언",
+)
+
+CONSTRUCT_FIELDS = (
+    "분석 수준",
+    "정의",
+    "포함",
+    "제외",
+    "관찰 가능한 근거",
+    "시간적 위치",
+    "가장 가까운 경쟁 구성개념",
+    "귀속 규칙",
+)
+
+PROPOSITION_FIELDS = (
+    "직접 근거 출처",
+    "통합 해석",
+    "분석 수준",
+    "자료원",
+    "지지 패턴",
+    "반증 패턴",
+    "경쟁 설명",
+    "연구 2 처분",
+)
+
+PROPOSITION_CARDS = {
+    "P1": ("kemell-2025", "golgeci-2025"),
+    "P2": ("golgeci-2025",),
+    "P3": ("golgeci-2025", "neumann-2026"),
+    "P4": ("kemell-2025", "neumann-2026"),
+    "P5": ("golgeci-2025", "neumann-2026"),
+    "P6": ("battilana-casciaro-2012",),
+    "P7": ("battilana-casciaro-2013",),
+}
+
+PACKAGE_EVIDENCE_LABELS = (
+    "논문 직접 근거",
+    "통합 해석",
+    "후속 연구 명제 (검증 전)",
+)
+
+PILOT_FIXED_CLAUSES = (
+    "한 초점 사건에는 하나의 명부만 사용하며, 고유 인물 최대 8명으로 제한한다.",
+    "각 alter마다 조언, 신뢰, 승인·예외, 위험 에스컬레이션 관계를 표시하고, 접촉 빈도, 지각된 신뢰, 공식 역할 속성은 한 번만 수집한다.",
+    "alter-alter 관계는 초점 사건에서 핵심 인물 최대 5명 사이에서만 묻고, 무방향 쌍 최대 10개로 제한한다.",
+    GUIDE_TIE_PROTOCOL,
+    P5_RULE,
+    "인터뷰와 관계망 조사 전에 IRB와 기업 보안·법무 승인을 완료한다.",
+    "비응답 지명자는 역할 범주로만 분석하며 규정위반 행동은 개인 코드가 아니라 사건에만 귀속한다.",
+    "연결코드 명부는 전사·코딩자료와 분리 암호화하고 연구책임자만 접근하며 분석 종료 시 폐기한다.",
+    "재직·협력 관계를 위치성·이해상충 진술에 공개한다.",
+    "참여자와 지휘·평가 관계가 없는 독립 모집 담당자가 모집과 동의 회수를 수행한다.",
+    "고용주에게 원자료를 제공하지 않는다. 법률 또는 IRB 승인 안전절차의 공개 한계는 동의서에 사전 명시한다.",
+)
+
 
 def section(text, heading):
     start = text.index(heading)
@@ -115,6 +189,66 @@ def h2_sections(text):
         (match.group(1), text[match.end():matches[index + 1].start() if index + 1 < len(matches) else len(text)])
         for index, match in enumerate(matches)
     )
+
+
+def markdown_section(text, heading):
+    match = re.search(rf"^(#{{1,6}}) {re.escape(heading)}(?:\s|$)", text, re.MULTILINE)
+    if not match:
+        raise AssertionError(f"missing section: {heading}")
+    level = len(match.group(1))
+    following = re.search(rf"^#{{1,{level}}} ", text[match.end():], re.MULTILINE)
+    end = match.end() + following.start() if following else len(text)
+    return text[match.end():end]
+
+
+def markdown_table_rows(text):
+    rows = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            continue
+        cells = tuple(cell.strip() for cell in stripped[1:-1].split("|"))
+        if all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        rows.append(cells)
+    return tuple(rows)
+
+
+def markdown_links(text):
+    return tuple(re.findall(r"(?<!!)\[[^]]+\]\(([^)]+)\)", text))
+
+
+def prose_paragraphs(text):
+    paragraphs = []
+    current = []
+    in_fence = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            if current:
+                paragraphs.append(tuple(current))
+                current = []
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        is_structure = (
+            not stripped
+            or stripped.startswith("#")
+            or stripped.startswith("|")
+            or stripped.startswith("- ")
+            or re.match(r"^\\d+\\. ", stripped)
+            or stripped in {"---", "***"}
+        )
+        if is_structure:
+            if current:
+                paragraphs.append(tuple(current))
+                current = []
+        else:
+            current.append(line)
+    if current:
+        paragraphs.append(tuple(current))
+    return tuple(paragraphs)
 
 
 class ResearchModelV03Tests(unittest.TestCase):
@@ -257,3 +391,127 @@ class ResearchModelV03Tests(unittest.TestCase):
         mutated = propositions_section.replace("P1-P7은 질적 연구에서 수정, 분기 또는 기각할 명제다.", "P1-P7은 검증된 가설이다.")
         with self.assertRaises(AssertionError):
             self.assert_once(mutated, "P1-P7은 질적 연구에서 수정, 분기 또는 기각할 명제다. 자료가 지지한 경로와 측정 타당성이 확보된 구성개념만 후속 양적 연구의 H1-Hn으로 전환한다.")
+
+    def public_v03_documents(self):
+        base = ROOT / "site/downloads/research-design"
+        paths = {name: base / name for name in V03_PACKAGE_FILES}
+        for name, path in paths.items():
+            self.assertTrue(path.is_file(), f"missing public v0.3 document: {name}")
+        return {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
+
+    def assert_mobile_document_contract(self, name, text):
+        for paragraph in prose_paragraphs(text):
+            self.assertLess(
+                len(paragraph),
+                6,
+                f"{name}: prose paragraph exceeds five lines: {paragraph!r}",
+            )
+        for row in markdown_table_rows(text):
+            self.assertLess(
+                len(row),
+                6,
+                f"{name}: table exceeds five columns: {row!r}",
+            )
+
+    def assert_relative_links_resolve(self, path, text):
+        for target in markdown_links(text):
+            href = target.split("#", 1)[0]
+            if not href or "://" in href or href.startswith("mailto:"):
+                continue
+            target_path = Path(href)
+            self.assertFalse(target_path.is_absolute(), f"{path.name}: non-relative link {target}")
+            self.assertTrue(
+                (path.parent / target_path).is_file(),
+                f"{path.name}: broken local link {target}",
+            )
+
+    def test_public_v03_package_is_complete_and_cross_linked(self):
+        documents = self.public_v03_documents()
+        paths = {
+            name: ROOT / "site/downloads/research-design" / name
+            for name in V03_PACKAGE_FILES
+        }
+        for name, text in documents.items():
+            for label in PACKAGE_EVIDENCE_LABELS:
+                self.assertIn(label, text, f"{name}: missing evidence-status label {label}")
+            self.assertIn("P1-P7", text, f"{name}: missing P1-P7 boundary")
+            self.assertIn("검증 전", text, f"{name}: missing verification boundary")
+            self.assert_relative_links_resolve(paths[name], text)
+            targets = {target.split("#", 1)[0] for target in markdown_links(text)}
+            for peer in V03_PACKAGE_FILES:
+                if peer != name:
+                    self.assertIn(peer, targets, f"{name}: missing package link to {peer}")
+
+        traceability = documents["proposition-traceability-v0.3.md"]
+        trace_targets = set(markdown_links(traceability))
+        for slugs in PROPOSITION_CARDS.values():
+            for slug in slugs:
+                expected = f"../{slug}/model-v0.3-contribution.md"
+                self.assertIn(expected, trace_targets, f"traceability: missing contribution-card link {expected}")
+
+    def test_public_v03_documents_are_mobile_readable_and_reject_a_wide_table(self):
+        documents = self.public_v03_documents()
+        for name, text in documents.items():
+            self.assert_mobile_document_contract(name, text)
+
+        mutated = documents["research-model-v0.3.md"] + "\n| A | B | C | D | E | F |\n| --- | --- | --- | --- | --- | --- |\n"
+        with self.assertRaises(AssertionError):
+            self.assert_mobile_document_contract("mutated", mutated)
+
+    def test_construct_dictionary_has_a_complete_card_for_every_construct(self):
+        dictionary = self.public_v03_documents()["construct-dictionary-v0.3.md"]
+        for construct in V03_CONSTRUCTS:
+            construct_section = markdown_section(dictionary, construct)
+            labels = {row[0] for row in markdown_table_rows(construct_section) if len(row) == 2}
+            self.assertTrue(
+                set(CONSTRUCT_FIELDS).issubset(labels),
+                f"{construct}: missing dictionary fields {set(CONSTRUCT_FIELDS) - labels}",
+            )
+
+        mutated = markdown_section(dictionary, "실행된 역할 보완성").replace(
+            "| 귀속 규칙 |", "| 판정 규칙 |", 1
+        )
+        labels = {row[0] for row in markdown_table_rows(mutated) if len(row) == 2}
+        self.assertFalse(set(CONSTRUCT_FIELDS).issubset(labels))
+
+    def test_proposition_traceability_has_all_required_rows_and_card_links(self):
+        traceability = self.public_v03_documents()["proposition-traceability-v0.3.md"]
+        for proposition, slugs in PROPOSITION_CARDS.items():
+            proposition_section = markdown_section(traceability, proposition)
+            self.assertIn("**상태:** 후속 연구 명제 (검증 전)", proposition_section)
+            labels = {row[0] for row in markdown_table_rows(proposition_section) if len(row) == 2}
+            self.assertTrue(
+                set(PROPOSITION_FIELDS).issubset(labels),
+                f"{proposition}: missing traceability fields {set(PROPOSITION_FIELDS) - labels}",
+            )
+            for slug in slugs:
+                self.assertIn(f"../{slug}/model-v0.3-contribution.md", proposition_section)
+
+        mutated = markdown_section(traceability, "P1").replace("| 연구 2 처분 |", "| 연구 2 상태 |", 1)
+        labels = {row[0] for row in markdown_table_rows(mutated) if len(row) == 2}
+        self.assertFalse(set(PROPOSITION_FIELDS).issubset(labels))
+
+    def test_pilot_protocol_preserves_operational_and_safety_contracts(self):
+        protocol = self.public_v03_documents()["pilot-protocol-and-codingbook-v0.3.md"]
+        agenda_section = markdown_section(protocol, "60분 진행 순서")
+        agenda_match = re.search(r"```text\n(.*?)\n```", agenda_section, re.DOTALL)
+        self.assertIsNotNone(agenda_match, "missing fixed 60-minute agenda block")
+        agenda = tuple(
+            (label.strip(), int(minutes))
+            for label, minutes in re.findall(r"([^|\n]+?)\s+(\d+)분", agenda_match.group(1))
+        )
+        self.assertEqual(agenda, AGENDA)
+        self.assertEqual(sum(minutes for _, minutes in agenda), 60)
+        for clause in PILOT_FIXED_CLAUSES:
+            self.assert_once(protocol, clause)
+        for relation in ("조언", "신뢰", "승인·예외", "위험 에스컬레이션"):
+            self.assertIn(relation, protocol)
+        for heading in ("사건 코드", "부정 사례 로그", "동의·철회", "중단 조건"):
+            self.assertIn(heading, protocol)
+        self.assertIn("인터뷰, 모집, 이름 생성, 조직 자료 수집은 시작하지 않았다.", protocol)
+        self.assertIn("NotebookLM 산출물은 근거로 사용하지 않는다.", protocol)
+
+        mutated = protocol.replace("무방향 쌍 최대 10개", "무방향 쌍 최대 12개", 1)
+        with self.assertRaises(AssertionError):
+            for clause in PILOT_FIXED_CLAUSES:
+                self.assert_once(mutated, clause)
