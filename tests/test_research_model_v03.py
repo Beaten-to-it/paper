@@ -257,14 +257,20 @@ P6_P7_DECISION_CONTRACT = {
         "연구 1 명제 처분": "두 분기가 모두 반복되면 유지 후보, 한 분기만 확인되면 분기·수정 후보, 반전이 반복되면 기각 후보로 기록한다. 단일 사건은 명제를 유지하지 못한다.",
     },
     "P7": {
-        "입력 조건": "EV2-D 고발산 후보, 설득 전 명확한 저항자 태도, EV3 이후 두 차례 이상의 관계 기반 설득, 그 뒤 관계압력·관계 손상·챔피언 소진을 함께 본다.",
+        "입력 조건": "EV2-D 고발산 후보, 첫 관계 기반 설득 전 당사자의 명시적 부정적 반대 또는 거절과 독립 자료로 교차확인된 명확한 저항자 태도, EV3 이후 두 차례 이상의 관계 기반 설득, 그 뒤 관계압력·관계 손상·챔피언 소진을 함께 본다.",
         "시간 순서": "고발산 판정 → 설득 전 저항자 태도 → 반복 설득 → 과정결과 순서를 요구하며 사후 태도로 초기 저항을 소급하지 않는다.",
-        "필요한 교차자료": "저항자 당사자 진술, 설득자·챔피언 진술, 반복 접촉 기록, 관계 양측 또는 독립 관찰자의 관계 변화 근거, 소진의 업무부담 자료를 연결한다.",
-        "지지 후보": "교차확인된 고발산 사건에서 명확한 저항자에게 두 차례 이상 관계 기반 설득한 뒤 관계압력·손상 또는 챔피언 소진이 나타난다.",
+        "필요한 교차자료": "저항자 당사자의 설득 전 명시적 부정적 반대 또는 거절 진술, 그 태도를 독립적으로 확인하는 동시기 문서·제3자 진술, 설득자·챔피언 진술, 반복 접촉 기록, 관계 양측 또는 독립 관찰자의 관계 변화 근거, 소진의 업무부담 자료를 연결한다.",
+        "지지 후보": "교차확인된 고발산 사건에서 설득 전 명시적 부정적 반대 또는 거절이 독립 자료로 확인된 명확한 저항자에게 두 차례 이상 관계 기반 설득한 뒤 관계압력·손상 또는 챔피언 소진이 나타난다.",
         "반증 후보": "같은 입력과 순서에서 관계·자율성이 유지된 채 조정되거나, 결과가 반복 설득보다 먼저 발생하거나 저발산 사건에서만 반복된다.",
-        "자료 부족·충돌": "초기 태도, 반복 횟수, 관계 결과의 시간 순서 또는 독립 자료가 부족·충돌하면 P7 판정을 유보하며 수신자 회피만으로 소진을 추정하지 않는다.",
+        "자료 부족·충돌": "설득 전 명시적 부정적 반대 또는 거절, 이를 확인할 독립 자료, 반복 횟수, 관계 결과의 시간 순서가 부족·충돌하면 P7 판정을 유보하며 보류를 명확한 저항으로 대체하거나 수신자 회피만으로 소진을 추정하지 않는다.",
         "연구 1 명제 처분": "결과가 반복되면 유지 후보, 압력·손상·소진 중 일부만 반복되면 분기·수정 후보, 충분한 반증이 반복되면 기각 후보로 기록한다. 단일 사건은 명제를 유지하지 못한다.",
     },
+}
+
+PRE_GATE_ALLOWED_PROHIBITIONS = {
+    "G0·G1 승인 전에는 후보자를 모집·접촉하지 않는다.",
+    "H1 동의 회수 전에는 인지면접을 시작하지 않는다.",
+    "필요한 재승인 전에는 파일럿을 진행하지 않는다.",
 }
 
 ETHICS_STAGE_CONTRACT = (
@@ -472,7 +478,8 @@ class ResearchModelV03Tests(unittest.TestCase):
 
         p7_section = markdown_section(protocol, "P7 사건 판정")
         for clause in (
-            "명확한 저항자 태도는 첫 관계 기반 설득 전에 당사자가 명시한 반대·거절·보류로 코딩하며, 설득 뒤 태도로 소급하지 않는다.",
+            "명확한 저항자 태도는 첫 관계 기반 설득 전에 당사자가 명시한 부정적 반대 또는 거절과 이를 뒷받침하는 독립 자료가 모두 있을 때만 코딩하며, 설득 뒤 태도로 소급하지 않는다.",
+            "보류는 양가적 또는 미결 태도로 별도 코딩하며 명확한 저항자 입력에 포함하지 않는다.",
             "반복 관계 설득은 서로 다른 시점의 두 차례 이상 접촉으로 코딩하며 한 대화 안의 반복 표현은 한 차례로 센다.",
         ):
             self.assert_once(p7_section, clause)
@@ -509,14 +516,15 @@ class ResearchModelV03Tests(unittest.TestCase):
             "재승인 없이",
         )
         human_actions = ("모집", "접촉", "인지면접", "파일럿")
-        safe_prohibitions = ("하지 않는다", "시작하지 않는다", "금지", "중단", "허용하지 않는다")
         for line in next_steps.splitlines():
             if not any(marker in line for marker in violation_markers):
                 continue
             if not any(action in line for action in human_actions):
                 continue
-            self.assertTrue(
-                any(prohibition in line for prohibition in safe_prohibitions),
+            instruction = re.sub(r"^(?:[-*]\s+|\d+\.\s+)", "", line.strip())
+            self.assertIn(
+                instruction,
+                PRE_GATE_ALLOWED_PROHIBITIONS,
                 f"pre-gate human-subject instruction: {line}",
             )
 
@@ -784,6 +792,14 @@ class ResearchModelV03Tests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.assert_divergence_measurement_contract(reversed_outcome)
 
+        clear_resistor_including_hold = protocol.replace(
+            "당사자가 명시한 부정적 반대 또는 거절과 이를 뒷받침하는 독립 자료",
+            "당사자가 명시한 반대·거절·보류와 이를 뒷받침하는 독립 자료",
+            1,
+        )
+        with self.assertRaises(AssertionError):
+            self.assert_divergence_measurement_contract(clear_resistor_including_hold)
+
     def test_matrix_requires_ethics_gates_before_any_human_contact(self):
         self.assert_ethics_stage_ordering(MATRIX)
 
@@ -807,7 +823,12 @@ class ResearchModelV03Tests(unittest.TestCase):
         for contradiction in (
             "승인 전에 후보자를 모집·접촉한다.",
             "재승인 전에 파일럿을 진행한다.",
+            "승인 전에 파일럿을 중단하지 않는다.",
         ):
             contradicted = MATRIX.replace(next_steps, next_steps + "\n" + contradiction, 1)
             with self.assertRaises(AssertionError):
                 self.assert_ethics_stage_ordering(contradicted)
+
+        for prohibition in PRE_GATE_ALLOWED_PROHIBITIONS:
+            prohibited = MATRIX.replace(next_steps, next_steps + "\n" + prohibition, 1)
+            self.assert_ethics_stage_ordering(prohibited)
