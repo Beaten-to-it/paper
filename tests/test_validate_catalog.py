@@ -61,9 +61,10 @@ class CatalogValidationTests(unittest.TestCase):
             {"id":"slides","type":"slides","title":"PPT","href":release + "slides.pptx","storage":"release","size_bytes":1,"sha256":"d" * 64,"status":"complete","provenance":"researcher_generated","access":"public"},
             {"id":"slide-pdf","type":"slide_pdf","title":"PDF","href":release + "slides.pdf","storage":"release","size_bytes":1,"sha256":"e" * 64,"status":"complete","provenance":"researcher_generated","access":"public"},
             {"id":"infographic","type":"infographic","title":"인포그래픽","href":"downloads/graphic.png","storage":"pages","size_bytes":68,"sha256":"431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460","status":"complete","provenance":"researcher_generated","access":"public"},
+            {"id":"model-contribution","type":"model_contribution","title":"기여 카드","href":"downloads/model-contribution.md","storage":"pages","size_bytes":12,"sha256":"a7b4dc56dac9faf3fec9eb6765d8fb5637c5be890fcc7f7897126c77bbbe535c","status":"complete","provenance":"researcher_generated","access":"public"},
         ]
         return {
-            "version": 2,
+            "version": 3,
             "updated": "2026-08-11",
             "papers": [{
                 "slug": "kemell-2025",
@@ -90,6 +91,7 @@ class CatalogValidationTests(unittest.TestCase):
             "downloads/prompt.md": b"prompt",
             "downloads/run.md": b"run",
             "downloads/graphic.png": base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="),
+            "downloads/model-contribution.md": b"contribution",
         }
 
     @classmethod
@@ -203,8 +205,108 @@ class CatalogValidationTests(unittest.TestCase):
 
         self.assertEqual(
             validate(catalog, SITE_ROOT, self.release_index(catalog)),
-            (6, 49),
+            (6, 62),
         )
+
+    def test_production_catalog_accepts_rebuilt_workbook_release_metadata(self):
+        catalog = self.production_catalog()
+        published = self.release_index(catalog)
+        design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+        workbook = next(artifact for artifact in design["artifacts"] if artifact["id"] == "research-model-v03-workbook")
+        published[workbook["href"]] = {
+            "size_bytes": 33_513,
+            "sha256": "ebe7d6047a5283580e284e622b7e214bd288648addc0fdb8249ead0d3909bee0",
+        }
+
+        try:
+            result = validate(catalog, SITE_ROOT, published)
+        except CatalogError as error:
+            self.fail(str(error))
+        self.assertEqual(result, (6, 62))
+
+    def test_v3_catalog_has_five_ten_slot_papers_and_twelve_design_artifacts(self):
+        catalog = self.production_catalog()
+        papers = [paper for paper in catalog["papers"] if paper["kind"] == "paper"]
+        design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+
+        self.assertEqual(catalog["version"], 3)
+        self.assertEqual(len(papers), 5)
+        self.assertTrue(all(len(paper["artifacts"]) == 10 for paper in papers))
+        self.assertTrue(all(sum(artifact["type"] == "model_contribution" for artifact in paper["artifacts"]) == 1 for paper in papers))
+        self.assertEqual(len(design["artifacts"]), 12)
+        self.assertEqual(sum(len(paper["artifacts"]) for paper in catalog["papers"]), 62)
+
+    def test_rejects_missing_paper_model_contribution(self):
+        catalog = self.production_catalog()
+        self.assertEqual(catalog["version"], 3)
+        paper = next(item for item in catalog["papers"] if item["slug"] == "kemell-2025")
+        paper["artifacts"] = [artifact for artifact in paper["artifacts"] if artifact["type"] != "model_contribution"]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_model_contribution_cards_swapped_between_papers(self):
+        catalog = self.production_catalog()
+        self.assertEqual(catalog["version"], 3)
+        kemell = next(item for item in catalog["papers"] if item["slug"] == "kemell-2025")
+        neumann = next(item for item in catalog["papers"] if item["slug"] == "neumann-2026")
+        kemell_card = next(artifact for artifact in kemell["artifacts"] if artifact["type"] == "model_contribution")
+        neumann_card = next(artifact for artifact in neumann["artifacts"] if artifact["type"] == "model_contribution")
+        for field in ("href", "size_bytes", "sha256"):
+            kemell_card[field], neumann_card[field] = neumann_card[field], kemell_card[field]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_duplicate_model_contribution_id_across_papers(self):
+        catalog = self.production_catalog()
+        self.assertEqual(catalog["version"], 3)
+        papers = [paper for paper in catalog["papers"] if paper["kind"] == "paper"]
+        first = next(artifact for artifact in papers[0]["artifacts"] if artifact["type"] == "model_contribution")
+        second = next(artifact for artifact in papers[1]["artifacts"] if artifact["type"] == "model_contribution")
+        second["id"] = first["id"]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_missing_v3_research_artifact(self):
+        catalog = self.production_catalog()
+        self.assertEqual(catalog["version"], 3)
+        design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+        design["artifacts"] = [artifact for artifact in design["artifacts"] if artifact["id"] != "pilot-protocol-v03"]
+
+        with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+            validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_v3_research_artifact_identity_or_binding_mutations(self):
+        mutations = {
+            "id": "research-model-v03-renamed",
+            "type": "research_design",
+            "storage": "release",
+            "href": "downloads/research-design/construct-dictionary-v0.3.md",
+        }
+        for field, value in mutations.items():
+            with self.subTest(field=field):
+                catalog = self.production_catalog()
+                design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+                model = next(artifact for artifact in design["artifacts"] if artifact["id"] == "research-model-v03")
+                model[field] = value
+
+                with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
+                    validate(catalog, SITE_ROOT, self.release_index(catalog))
+
+    def test_rejects_v3_release_size_or_sha_that_differs_from_published_asset(self):
+        for field, value in (("size_bytes", 1), ("sha256", "0" * 64)):
+            with self.subTest(field=field):
+                catalog = self.production_catalog()
+                self.assertEqual(catalog["version"], 3)
+                published = self.release_index(catalog)
+                design = next(paper for paper in catalog["papers"] if paper["kind"] == "research-design")
+                workbook = next(artifact for artifact in design["artifacts"] if artifact["id"] == "research-model-v03-workbook")
+                workbook[field] = value
+
+                with self.assertRaisesRegex(CatalogError, "release asset metadata mismatch"):
+                    validate(catalog, SITE_ROOT, published)
 
     def test_rejects_duplicate_approved_paper_group(self):
         catalog = self.production_catalog()
@@ -215,7 +317,7 @@ class CatalogValidationTests(unittest.TestCase):
 
     def test_rejects_production_catalog_version_downgrade(self):
         catalog = self.production_catalog()
-        catalog["version"] = 1
+        catalog["version"] = 2
 
         with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
             validate(catalog, SITE_ROOT, self.release_index(catalog))
@@ -251,11 +353,11 @@ class CatalogValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(CatalogError, "canonical catalog identity"):
             validate(catalog, SITE_ROOT, self.release_index(catalog))
 
-    def test_accepts_a_rights_aware_nine_slot_paper(self):
+    def test_accepts_a_rights_aware_ten_slot_paper(self):
         result = self.run_validator(self.rights_aware_catalog(), self.rights_aware_files())
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("1 papers, 9 artifacts", result.stdout)
+        self.assertIn("1 papers, 10 artifacts", result.stdout)
 
     def test_rejects_public_redistribution_when_rights_disallow_it(self):
         catalog = self.rights_aware_catalog()
@@ -273,7 +375,7 @@ class CatalogValidationTests(unittest.TestCase):
         result = self.run_validator(catalog, self.rights_aware_files())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("nine-slot contract", result.stderr)
+        self.assertIn("ten-slot contract", result.stderr)
 
     def test_accepts_official_link_with_declared_encrypted_companions(self):
         result = self.run_validator(self.restricted_rights_catalog(), self.restricted_rights_files())
@@ -468,6 +570,22 @@ class CatalogValidationTests(unittest.TestCase):
         files["downloads/graphic.png"] = bytes([137, 80, 78, 71, 13, 10, 26, 10])
 
         result = self.run_validator(catalog, files)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("page content does not match declared type", result.stderr)
+
+    def test_rejects_header_only_png_as_complete_model_diagram(self):
+        payload = bytes([137, 80, 78, 71, 13, 10, 26, 10])
+        catalog = self.valid_catalog()
+        artifact = catalog["papers"][0]["artifacts"][0]
+        artifact.update({
+            "type": "model_diagram",
+            "href": "downloads/model.png",
+            "size_bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        })
+
+        result = self.run_validator(catalog, {artifact["href"]: payload})
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("page content does not match declared type", result.stderr)

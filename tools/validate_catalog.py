@@ -61,14 +61,21 @@ PAPER_SLOT_TYPES = {
     "slides",
     "slide_pdf",
     "infographic",
+    "model_contribution",
 }
 PAGES_EXTENSIONS = {
     "analysis": {".md"},
+    "construct_dictionary": {".md"},
     "infographic": {".png"},
     "korean_version": {".md"},
+    "model_contribution": {".md"},
+    "model_diagram": {".png"},
     "notebooklm_prompt": {".md"},
     "notebooklm_run": {".md"},
+    "pilot_protocol": {".md"},
+    "proposition_traceability": {".md"},
     "research_design": {".md"},
+    "research_model": {".md"},
     "research_synthesis": {".md"},
 }
 RELEASE_EXTENSIONS = {
@@ -94,13 +101,14 @@ PUBLIC_SITE_FILES = {
 }
 RELEASE_V1 = "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v1/"
 RELEASE_V2 = "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-11-v2/"
+RELEASE_V3 = "https://github.com/Beaten-to-it/paper/releases/download/artifacts-2026-08-12-v3/"
 EXPECTED_GROUP_IDENTITIES = {
     "kemell-2025": ("paper", 2025, "Still just personal assistants?", "Kemell, Saarikallio, Nguyen-Duc, & Abrahamsson (2025) · Information and Software Technology 186, 107805"),
     "neumann-2026": ("paper", 2026, "Between Policy and Practice", "Neumann et al. (2026) · Between Policy and Practice: GenAI Adoption in Agile Software Development Teams"),
     "golgeci-2025": ("paper", 2025, "Confronting and alleviating AI resistance in the workplace", "Golgeci, Ritala, Arslan, McKenna, & Ali (2025) · Human Resource Management Review 35, 101075"),
     "battilana-casciaro-2012": ("paper", 2012, "Change Agents, Networks, and Institutions", "Battilana & Casciaro (2012) · Academy of Management Journal 55(2)"),
     "battilana-casciaro-2013": ("paper", 2013, "Overcoming Resistance to Organizational Change", "Battilana & Casciaro (2013) · Management Science 59(4), 819-836"),
-    "research-design": ("research-design", 2026, "연구 종합과 설계", "Doctoral research design · updated 2026-08-11"),
+    "research-design": ("research-design", 2026, "연구 종합과 설계", "Doctoral research design · updated 2026-08-12"),
 }
 EXPECTED_ARTIFACT_BINDINGS = {
     "kemell-2025": {
@@ -113,6 +121,7 @@ EXPECTED_ARTIFACT_BINDINGS = {
         "kemell-slides": ("slides", "release", RELEASE_V1 + "Kemell-2025-seminar-deck.pptx"),
         "kemell-slide-pdf": ("slide_pdf", "release", RELEASE_V1 + "Kemell-2025-seminar-deck.pdf"),
         "kemell-infographic": ("infographic", "pages", "downloads/kemell-2025/infographic.png"),
+        "kemell-2025-model-contribution": ("model_contribution", "pages", "downloads/kemell-2025/model-v0.3-contribution.md"),
     },
     "neumann-2026": {
         "neumann-2026-source": ("source_paper", "release", RELEASE_V2 + "Neumann-et-al-2026-Between-policy-and-practice.pdf"),
@@ -124,6 +133,7 @@ EXPECTED_ARTIFACT_BINDINGS = {
         "neumann-slides": ("slides", "release", RELEASE_V1 + "Neumann-2026-NotebookLM-seminar-deck.pptx"),
         "neumann-slide-pdf": ("slide_pdf", "release", RELEASE_V1 + "Neumann-2026-NotebookLM-seminar-deck.pdf"),
         "neumann-infographic": ("infographic", "pages", "downloads/neumann-2026/infographic.png"),
+        "neumann-2026-model-contribution": ("model_contribution", "pages", "downloads/neumann-2026/model-v0.3-contribution.md"),
     },
     "golgeci-2025": {
         "golgeci-2025-source": ("source_paper", "release", RELEASE_V2 + "Golgeci-et-al-2025-AI-resistance-process-framework.pdf"),
@@ -135,6 +145,7 @@ EXPECTED_ARTIFACT_BINDINGS = {
         "golgeci-slides": ("slides", "release", RELEASE_V2 + "Golgeci-2025-NotebookLM-seminar-deck.pptx"),
         "golgeci-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Golgeci-2025-NotebookLM-seminar-deck.pdf"),
         "golgeci-infographic": ("infographic", "pages", "downloads/golgeci-2025/infographic.png"),
+        "golgeci-2025-model-contribution": ("model_contribution", "pages", "downloads/golgeci-2025/model-v0.3-contribution.md"),
     },
     "battilana-casciaro-2012": {
         "bc2012-source": ("source_paper", "external", "https://doi.org/10.5465/amj.2009.0891"),
@@ -146,6 +157,7 @@ EXPECTED_ARTIFACT_BINDINGS = {
         "bc2012-slides": ("slides", "release", RELEASE_V2 + "Battilana-Casciaro-2012-NotebookLM-seminar-deck.pptx"),
         "bc2012-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Battilana-Casciaro-2012-NotebookLM-seminar-deck.pdf"),
         "bc2012-infographic": ("infographic", "pages", "downloads/battilana-casciaro-2012/infographic.png"),
+        "battilana-casciaro-2012-model-contribution": ("model_contribution", "pages", "downloads/battilana-casciaro-2012/model-v0.3-contribution.md"),
     },
     "battilana-casciaro-2013": {
         "bc2013-source": ("source_paper", "external", "https://doi.org/10.1287/mnsc.1120.1583"),
@@ -157,12 +169,21 @@ EXPECTED_ARTIFACT_BINDINGS = {
         "bc2013-slides": ("slides", "release", RELEASE_V2 + "Battilana-Casciaro-2013-NotebookLM-seminar-deck.pptx"),
         "bc2013-slide-pdf": ("slide_pdf", "release", RELEASE_V2 + "Battilana-Casciaro-2013-NotebookLM-seminar-deck.pdf"),
         "bc2013-infographic": ("infographic", "pages", "downloads/battilana-casciaro-2013/infographic.png"),
+        "battilana-casciaro-2013-model-contribution": ("model_contribution", "pages", "downloads/battilana-casciaro-2013/model-v0.3-contribution.md"),
     },
     "research-design": {
         "four-paper-bridge": ("research_synthesis", "pages", "downloads/research-design/four-paper-theory-bridge.md"),
         "literature-map": ("research_design", "pages", "downloads/research-design/literature-map.md"),
         "core-matrix": ("research_design", "pages", "downloads/research-design/core-paper-matrix-research-model-interview-guide.md"),
         "literature-map-xlsx": ("spreadsheet", "release", RELEASE_V1 + "AI-transformation-change-agent-literature-map-2026-08-10.xlsx"),
+        "research-model-v03": ("research_model", "pages", "downloads/research-design/research-model-v0.3.md"),
+        "construct-dictionary-v03": ("construct_dictionary", "pages", "downloads/research-design/construct-dictionary-v0.3.md"),
+        "proposition-traceability-v03": ("proposition_traceability", "pages", "downloads/research-design/proposition-traceability-v0.3.md"),
+        "pilot-protocol-v03": ("pilot_protocol", "pages", "downloads/research-design/pilot-protocol-and-codingbook-v0.3.md"),
+        "research-model-v03-diagram": ("model_diagram", "pages", "downloads/research-design/research-model-v0.3.png"),
+        "research-model-v03-workbook": ("spreadsheet", "release", RELEASE_V3 + "SW-AI-change-agent-research-model-v0.3-workbook.xlsx"),
+        "research-model-v03-slides": ("slides", "release", RELEASE_V3 + "SW-AI-change-agent-research-model-v0.3-advisor-deck.pptx"),
+        "research-model-v03-slide-pdf": ("slide_pdf", "release", RELEASE_V3 + "SW-AI-change-agent-research-model-v0.3-advisor-deck.pdf"),
     },
 }
 
@@ -373,7 +394,7 @@ def validate_paper_contract(paper: dict) -> None:
     validate_rights(paper)
     artifacts = paper["artifacts"]
     if len(artifacts) != len(PAPER_SLOT_TYPES) or {artifact["type"] for artifact in artifacts} != PAPER_SLOT_TYPES:
-        raise CatalogError("paper artifacts must satisfy the nine-slot contract")
+        raise CatalogError("paper artifacts must satisfy the ten-slot contract")
     if any(artifact.get("status") != "complete" for artifact in artifacts):
         raise CatalogError("rights-aware paper artifacts must all be complete")
     for artifact in artifacts:
@@ -455,8 +476,8 @@ def validate_catalog_identity(catalog: dict) -> None:
             if actual_binding != expected_bindings[artifact_id] or artifact.get("status") != "complete":
                 raise CatalogError(f"canonical catalog identity mismatch: {artifact_id}")
 
-    if len(global_artifact_ids) != 49:
-        raise CatalogError("canonical catalog identity mismatch: expected 49 unique artifacts")
+    if len(global_artifact_ids) != 62:
+        raise CatalogError("canonical catalog identity mismatch: expected 62 unique artifacts")
 
 
 def is_valid_png(payload: bytes) -> bool:
@@ -520,9 +541,9 @@ def looks_like_pdf(payload: bytes) -> bool:
 def validate_page_content(artifact: dict, payload: bytes) -> None:
     if looks_like_pdf(payload):
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
-    if artifact["type"] == "infographic" and not is_valid_png(payload):
+    if artifact["type"] in {"infographic", "model_diagram"} and not is_valid_png(payload):
         raise CatalogError(f"page content does not match declared type: {artifact['href']}")
-    if artifact["type"] != "infographic":
+    if artifact["type"] not in {"infographic", "model_diagram"}:
         try:
             payload.decode("utf-8")
         except UnicodeDecodeError as error:
@@ -550,8 +571,8 @@ def validate(
     schema_version = catalog.get("version", 1)
     if isinstance(schema_version, bool) or not isinstance(schema_version, int) or schema_version < 1:
         raise CatalogError("invalid catalog version")
-    if enforce_identity and schema_version != 2:
-        raise CatalogError("canonical catalog identity mismatch: expected version 2")
+    if enforce_identity and schema_version != 3:
+        raise CatalogError("canonical catalog identity mismatch: expected version 3")
     if schema_version >= 2 and release_assets is None and any(
         artifact.get("status") == "complete" and artifact.get("storage") == "release"
         for paper in papers

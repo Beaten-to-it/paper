@@ -16,9 +16,9 @@ SW 조직의 AI 전환과 변화주도자 네트워크를 연구하는 박사과
 
 ## 카탈로그 구조
 
-- 논문 5편은 각각 `원문 / 한국어본 / 분석 / NotebookLM 프롬프트 / 실행기록 / 음성 / PPT / 슬라이드 PDF / 인포그래픽`의 9개 슬롯을 가집니다.
-- 연구설계 산출물 4개를 더해 총 49개 항목을 `site/data/catalog.json`에서 관리합니다.
-- 대용량 공개 파일은 `artifacts-2026-08-11-v1` 또는 `artifacts-2026-08-11-v2` GitHub Release에, Markdown·인포그래픽·암호문은 Pages에 둡니다.
+- 논문 5편은 각각 `원문 / 한국어본 / 분석 / NotebookLM 프롬프트 / 실행기록 / 음성 / PPT / 슬라이드 PDF / 인포그래픽 / 연구모형 기여`의 10개 슬롯을 가집니다.
+- 연구설계 그룹의 12개 산출물을 더해 6개 그룹, 총 62개 완료 항목을 `site/data/catalog.json`에서 관리합니다.
+- 대용량 공개 파일은 `artifacts-2026-08-11-v1`, `artifacts-2026-08-11-v2` 또는 `artifacts-2026-08-12-v3` GitHub Release에, Markdown·PNG·암호문은 Pages에 둡니다.
 
 ## 검증
 
